@@ -36,10 +36,11 @@ export default function Navbar() {
           </a>
 
           {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
             <a href="#" className="hover:text-amber-600 transition-colors">Início</a>
             <a href="#empresa" className="hover:text-amber-600 transition-colors">A Empresa</a>
             <a href="#produtos" className="hover:text-amber-600 transition-colors">Combustíveis</a>
+            <a href="#frota" className="hover:text-amber-600 transition-colors">Nossa Frota</a>
             <a href="#bases" className="hover:text-amber-600 transition-colors">Bases</a>
             <a href="#contato" className="hover:text-amber-600 transition-colors">Contato</a>
           </nav>
@@ -84,6 +85,7 @@ export default function Navbar() {
             <a href="#" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">Início</a>
             <a href="#empresa" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">A Empresa</a>
             <a href="#produtos" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">Combustíveis & Serviços</a>
+            <a href="#frota" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">Nossa Frota</a>
             <a href="#bases" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">Bases Operacionais</a>
             <a href="#contato" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-amber-600">Contato</a>
           </nav>

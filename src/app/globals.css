@@ -42,3 +42,59 @@
 .animate-pulse-subtle {
   animation: pulse-subtle 3s infinite ease-in-out;
 }
+
+/* Fleet Carousel Smooth Animations */
+@keyframes carousel-slide-right {
+  0% {
+    opacity: 0.2;
+    transform: translateX(45px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes carousel-slide-left {
+  0% {
+    opacity: 0.2;
+    transform: translateX(-45px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes carousel-caption {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes carousel-timer {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.animate-carousel-right {
+  animation: carousel-slide-right 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-carousel-left {
+  animation: carousel-slide-left 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-carousel-caption {
+  animation: carousel-caption 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+}
+
