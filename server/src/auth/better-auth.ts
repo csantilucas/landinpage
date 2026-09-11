@@ -1,7 +1,7 @@
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { Db } from 'mongodb';
-import { ENV } from '../config/env.js';
+import { ENV, getAllowedOrigins } from '../config/env.js';
 
 let authInstance: any = null;
 
@@ -23,9 +23,26 @@ export function initAuth(db: Db) {
         },
       },
     },
+    advanced: {
+      defaultCookieAttributes: {
+        sameSite: 'none',
+        secure: true,
+        partitioned: true,
+      },
+      useSecureCookies: true,
+    },
     trustedOrigins: (request) => {
       const origin = request?.headers?.get('origin');
-      return origin ? [origin] : [];
+      const referer = request?.headers?.get('referer');
+      const origins: string[] = getAllowedOrigins();
+      if (origin && !origins.includes(origin)) origins.push(origin);
+      if (referer) {
+        try {
+          const refOrigin = new URL(referer).origin;
+          if (!origins.includes(refOrigin)) origins.push(refOrigin);
+        } catch {}
+      }
+      return origins;
     },
   });
 

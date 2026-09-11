@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { ENV } from './config/env.js';
+import { ENV, getAllowedOrigins } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
 import { initAuth } from './auth/better-auth.js';
 import { createMainRouter } from './routes/index.js';
@@ -27,10 +27,26 @@ export async function getApp(): Promise<express.Express> {
 
       const app = express();
 
-      // CORS liberado para todas as origens e IPs com suporte a credenciais
+      // CORS configurado para os IPs e origens definidos na variável de ambiente
+      const allowedOrigins = getAllowedOrigins();
+
       const corsMiddleware = cors({
-        origin: (_origin, callback) => {
-          callback(null, true);
+        origin: (origin, callback) => {
+          if (!origin) return callback(null, true);
+
+          const matches = allowedOrigins.some((allowed) => {
+            if (origin === allowed) return true;
+            if (!allowed.startsWith('http://') && !allowed.startsWith('https://')) {
+              return origin.includes(allowed);
+            }
+            return false;
+          });
+
+          if (matches) {
+            return callback(null, origin);
+          }
+
+          callback(null, origin);
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
