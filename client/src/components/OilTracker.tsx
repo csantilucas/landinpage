@@ -93,7 +93,7 @@ export function CommoditiesTestTicker() {
                 <strong>
                   {usdToBrl
                     ? `R$ ${usdToBrl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : 'Cotação não disponível'}
+                    : 'Não é possível buscar a cotação no momento'}
                 </strong>
               </span>
             </div>
@@ -203,15 +203,15 @@ export function CommoditiesTestTicker() {
             })}
           </div>
         ) : (
-          /* Quando a API não estiver disponível: exibe mensagem clara sem usar valores falsos de fallback */
+          /* Quando a API não estiver disponível: exibe mensagem clara sem usar valores de fallback */
           <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center flex flex-col items-center justify-center gap-3 mb-5 shadow-2xs">
             <div className="p-3 bg-slate-100 rounded-full text-slate-500 border border-slate-200">
               <AlertCircle className="w-6 h-6 text-amber-500" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-800">Cotação não disponível</h4>
+              <h4 className="text-sm font-bold text-slate-800">Não é possível buscar a cotação no momento</h4>
               <p className="text-xs text-slate-500 mt-1 max-w-md">
-                As cotações do mercado internacional estão temporariamente indisponíveis. A atualização será restabelecida automaticamente.
+                As cotações do mercado estão temporariamente indisponíveis. A atualização será restabelecida assim que os dados estiverem disponíveis.
               </p>
             </div>
           </div>

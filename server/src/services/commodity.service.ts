@@ -76,7 +76,7 @@ export class CommodityService {
     } catch (err) {
       console.warn('[CommodityService] Fallback AwesomeAPI Dólar indisponível:', err);
     }
-    return 5.10;
+    return 0;
   }
 
   /**
@@ -320,7 +320,7 @@ export class CommodityService {
         source: 'fallback',
         isStale: true,
         isAvailable: false,
-        message: 'Cotação não disponível',
+        message: 'Não é possível buscar a cotação no momento',
       };
     }
   }

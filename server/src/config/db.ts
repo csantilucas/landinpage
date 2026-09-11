@@ -8,7 +8,7 @@ export async function connectDB(): Promise<Db> {
   if (db) return db;
 
   try {
-    client = new MongoClient(ENV.MONGODB_URI, {
+    client = new MongoClient(ENV.MONGODB_URI!, {
       serverSelectionTimeoutMS: 5000,
     });
     await client.connect();

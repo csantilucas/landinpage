@@ -62,7 +62,7 @@ export async function GET() {
 
     const usdRate = usdQuote?.regularMarketPrice && usdQuote.regularMarketPrice > 0
       ? Number(usdQuote.regularMarketPrice.toFixed(4))
-      : 5.10;
+      : 0;
 
     const calcChange = (price: number, prevClose: number) => {
       if (!prevClose || prevClose <= 0) return { change: '0.00%', isPositive: true };
@@ -190,10 +190,10 @@ export async function GET() {
         error: error?.message || 'Falha ao obter cotações do Yahoo Finance',
         data: {
           items: [],
-          usdToBrl: 5.10,
+          usdToBrl: 0,
           updatedAt: new Date().toISOString(),
           isAvailable: false,
-          message: 'Cotação não disponível',
+          message: 'Não é possível buscar a cotação no momento',
         },
       },
       { status: 500 }
