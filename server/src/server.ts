@@ -14,41 +14,50 @@ export async function getApp(): Promise<express.Express> {
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    console.log('[Server] Inicializando conexão com o MongoDB...');
-    const db = await connectDB();
+    try {
+      if (!ENV.MONGODB_URI) {
+        throw new Error('A variável de ambiente MONGODB_URI não foi definida nas configurações da Vercel.');
+      }
 
-    console.log('[Server] Inicializando Better Auth com adaptador MongoDB...');
-    initAuth(db);
+      console.log('[Server] Inicializando conexão com o MongoDB...');
+      const db = await connectDB();
 
-    const app = express();
+      console.log('[Server] Inicializando Better Auth com adaptador MongoDB...');
+      initAuth(db);
 
-    // CORS liberado para todas as origens e IPs com suporte a credenciais
-    const corsMiddleware = cors({
-      origin: (_origin, callback) => {
-        callback(null, true);
-      },
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-    });
+      const app = express();
 
-    app.use(corsMiddleware);
-    app.options('*', corsMiddleware);
+      // CORS liberado para todas as origens e IPs com suporte a credenciais
+      const corsMiddleware = cors({
+        origin: (_origin, callback) => {
+          callback(null, true);
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+      });
 
-    // Parse JSON
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
+      app.use(corsMiddleware);
+      app.options('*', corsMiddleware);
 
-    // Montagem da API
-    app.use('/api', createMainRouter());
+      // Parse JSON
+      app.use(express.json());
+      app.use(express.urlencoded({ extended: true }));
 
-    // Middleware de erro 404
-    app.use((_req, res) => {
-      res.status(404).json({ success: false, error: 'Rota não encontrada' });
-    });
+      // Montagem da API
+      app.use('/api', createMainRouter());
 
-    appInstance = app;
-    return app;
+      // Middleware de erro 404
+      app.use((_req, res) => {
+        res.status(404).json({ success: false, error: 'Rota não encontrada' });
+      });
+
+      appInstance = app;
+      return app;
+    } catch (err) {
+      initPromise = null;
+      throw err;
+    }
   })();
 
   return initPromise;
@@ -56,8 +65,28 @@ export async function getApp(): Promise<express.Express> {
 
 // Handler padrão para serverless (Vercel)
 export default async function handler(req: any, res: any) {
-  const app = await getApp();
-  return app(req, res);
+  try {
+    const app = await getApp();
+    return app(req, res);
+  } catch (error: any) {
+    console.error('[Serverless Fatal Error]:', error);
+    if (!res.headersSent) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Access-Control-Allow-Origin', req.headers?.origin || '*');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      return res.end(
+        JSON.stringify({
+          success: false,
+          error: 'Falha na inicialização do backend',
+          message: error?.message || String(error),
+          hint: !ENV.MONGODB_URI
+            ? 'Adicione MONGODB_URI nas Environment Variables da Vercel.'
+            : 'Verifique se o MongoDB Atlas permite conexões de qualquer IP (Network Access: 0.0.0.0/0).',
+        })
+      );
+    }
+  }
 }
 
 async function bootstrap() {

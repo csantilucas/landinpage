@@ -57,24 +57,27 @@ async function seed() {
       throw new Error('Falha ao inicializar Better Auth no seed');
     }
 
+    const adminEmail = 'admin@trrkrupinski.com.br';
+    const adminPassword = 'admin123456';
+
     console.log('[Seed] Verificando conta de administrador...');
     const usersCollection = db.collection('user');
-    const existingAdmin = await usersCollection.findOne({ email: ENV.ADMIN_EMAIL });
+    const existingAdmin = await usersCollection.findOne({ email: adminEmail });
 
     if (!existingAdmin) {
-      console.log(`[Seed] Criando administrador inicial: ${ENV.ADMIN_EMAIL}`);
+      console.log(`[Seed] Criando administrador inicial: ${adminEmail}`);
       try {
         const adminUser = await auth.api.signUpEmail({
           body: {
             name: 'Administrador TRR Krupinski',
-            email: ENV.ADMIN_EMAIL,
-            password: ENV.ADMIN_PASSWORD,
+            email: adminEmail,
+            password: adminPassword,
           },
         });
 
         if (adminUser?.user?.id) {
           await usersCollection.updateOne(
-            { email: ENV.ADMIN_EMAIL },
+            { email: adminEmail },
             { $set: { role: 'admin' } }
           );
         }
@@ -82,7 +85,7 @@ async function seed() {
       } catch (err: any) {
         console.log('[Seed] Nota sobre cadastro admin:', err?.message || err);
         await usersCollection.updateOne(
-          { email: ENV.ADMIN_EMAIL },
+          { email: adminEmail },
           { $set: { role: 'admin' } },
           { upsert: false }
         );
@@ -90,7 +93,7 @@ async function seed() {
     } else {
       console.log('[Seed] Administrador já existente no banco. Garantindo role admin...');
       await usersCollection.updateOne(
-        { email: ENV.ADMIN_EMAIL },
+        { email: adminEmail },
         { $set: { role: 'admin' } }
       );
     }
