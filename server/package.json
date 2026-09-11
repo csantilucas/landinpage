@@ -4,6 +4,7 @@
   "private": true,
   "description": "Backend API para a TRR Krupinski com Better Auth, MongoDB e arquitetura em camadas",
   "main": "dist/server.js",
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
