@@ -87,7 +87,7 @@ export default function BannerCarousel({ initialBanners, isEditable = false }: B
         <div className="max-w-3xl text-left">
           
           {/* Título Principal com Sombra Limpa */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-green-800 mb-4 drop-shadow-lg tracking-tight leading-[1.08]">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg tracking-tight leading-[1.08]">
             {currentBanner.title}
           </h1>
 
