@@ -23,16 +23,17 @@ export async function getApp(): Promise<express.Express> {
     const app = express();
 
     // CORS liberado para todas as origens e IPs com suporte a credenciais
-    app.use(
-      cors({
-        origin: (_origin, callback) => {
-          callback(null, true);
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-      })
-    );
+    const corsMiddleware = cors({
+      origin: (_origin, callback) => {
+        callback(null, true);
+      },
+      credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    });
+
+    app.use(corsMiddleware);
+    app.options('*', corsMiddleware);
 
     // Parse JSON
     app.use(express.json());
