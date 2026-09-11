@@ -14,6 +14,8 @@ import {
   Loader2,
   Layers,
   Image as ImageIcon,
+  Sparkles,
+  MapPin,
 } from 'lucide-react';
 import { useSession, signOut } from '@/lib/auth-client';
 
@@ -56,6 +58,8 @@ export default function AdminLayout({
 
   const navItems = [
     { href: '/admin', label: 'Início', icon: LayoutDashboard },
+    { href: '/admin/banners', label: 'Banners do Topo', icon: Sparkles },
+    { href: '/admin/bases', label: 'Bases Operacionais', icon: MapPin },
     { href: '/admin/avisos', label: 'Quadro de Avisos', icon: Bell },
     { href: '/admin/imagens', label: 'Fotos do Site', icon: ImageIcon },
     { href: '/admin/conteudo', label: 'Textos do Site', icon: FileText },

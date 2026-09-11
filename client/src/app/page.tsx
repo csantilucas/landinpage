@@ -16,6 +16,7 @@ import ScrollProgressBar from '@/components/ScrollProgressBar';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSiteContent, SectionOrderItem } from '@/lib/api';
 import { CommoditiesTestTicker } from '@/components/OilTracker';
+import BannerCarousel from '@/components/BannerCarousel';
 
 const DEFAULT_SECTIONS: SectionOrderItem[] = [
   { id: 'hero', name: 'Seção Inicial (Hero)', enabled: true, order: 1 },
@@ -54,14 +55,18 @@ export default function Home() {
     .filter((sec) => sec.enabled !== false)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  return (
+  return (  
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans relative">
       <ScrollProgressBar />
       <Navbar />
 
+      {/* Banner Principal com Carrossel Automático */}
+      <BannerCarousel />
+
       <main className="flex-1">
         {activeSections.map((sec) => SECTION_COMPONENTS[sec.id] || null)}
       </main>
+      
 
       <CommoditiesTestTicker />
       <Footer />

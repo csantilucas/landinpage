@@ -3,18 +3,26 @@
 import React from 'react';
 import { MapPin, Phone, MessageSquare, ExternalLink } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSiteContent, OperationalBase } from '@/lib/api';
+import { fetchActiveBases, fetchSiteContent, OperationalBase } from '@/lib/api';
 import CompanyMap from '@/components/CompanyMap';
 import ScrollReveal from '@/components/ScrollReveal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { FALLBACK_BASES } from '@/data/fallbackData';
 
 export default function BasesGrid() {
-  const { data: siteContent, isLoading } = useQuery({
+  const { data: basesData, isLoading: isBasesLoading } = useQuery({
+    queryKey: ['activeBases'],
+    queryFn: fetchActiveBases,
+    staleTime: 1000 * 60 * 2,
+  });
+
+  const { data: siteContent, isLoading: isContentLoading } = useQuery({
     queryKey: ['siteContent'],
     queryFn: () => fetchSiteContent(),
     staleTime: 1000 * 60 * 5,
   });
+
+  const isLoading = isBasesLoading && isContentLoading;
 
   if (isLoading) {
     return (
@@ -48,9 +56,11 @@ export default function BasesGrid() {
   }
 
   const operationalBases: OperationalBase[] =
-    siteContent?.company_bases && siteContent.company_bases.length > 0
-      ? siteContent.company_bases
-      : FALLBACK_BASES;
+    basesData && basesData.length > 0
+      ? basesData
+      : (siteContent?.company_bases && siteContent.company_bases.length > 0
+          ? siteContent.company_bases
+          : FALLBACK_BASES);
 
   return (
     <section id="bases" className="py-20 bg-white border-t border-slate-200 overflow-hidden">

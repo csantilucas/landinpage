@@ -27,6 +27,19 @@ export interface FleetItem {
   updatedAt: string;
 }
 
+export interface BannerItem {
+  _id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  order: number;
+  active: boolean;
+  linkUrl?: string;
+  linkText?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export type SiteImage = FleetItem;
 
 export interface SectionOrderItem {
@@ -79,6 +92,9 @@ export interface OperationalBase {
   googleMapsUrl: string;
   embedUrl: string;
   wazeUrl?: string;
+  _id?: string;
+  order?: number;
+  active?: boolean;
 }
 
 /**
@@ -122,6 +138,34 @@ export async function fetchActiveFleet(): Promise<FleetItem[]> {
     return data.success ? data.data : [];
   } catch (error) {
     console.error('Erro ao buscar frota ativa:', error);
+    return [];
+  }
+}
+
+export async function fetchActiveBanners(): Promise<BannerItem[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/banners`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch (error) {
+    console.error('Erro ao buscar banners ativos:', error);
+    return [];
+  }
+}
+
+export async function fetchActiveBases(): Promise<OperationalBase[]> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bases`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.success ? data.data : [];
+  } catch (error) {
+    console.error('Erro ao buscar bases ativas:', error);
     return [];
   }
 }
@@ -265,4 +309,22 @@ export const adminApi = {
   getContent: () => adminFetch('/api/admin/content'),
   updateContent: (key: string, data: Record<string, any>) =>
     adminFetch(`/api/admin/content/${key}`, { method: 'PUT', body: JSON.stringify(data) }),
+
+  // Banners do Topo (Carrossel)
+  getBanners: () => adminFetch('/api/admin/banners'),
+  createBanner: (data: Partial<BannerItem>) =>
+    adminFetch('/api/admin/banners', { method: 'POST', body: JSON.stringify(data) }),
+  updateBanner: (id: string, data: Partial<BannerItem>) =>
+    adminFetch(`/api/admin/banners/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBanner: (id: string) =>
+    adminFetch(`/api/admin/banners/${id}`, { method: 'DELETE' }),
+
+  // Bases Operacionais
+  getBases: () => adminFetch('/api/admin/bases'),
+  createBase: (data: Partial<OperationalBase>) =>
+    adminFetch('/api/admin/bases', { method: 'POST', body: JSON.stringify(data) }),
+  updateBase: (id: string, data: Partial<OperationalBase>) =>
+    adminFetch(`/api/admin/bases/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deleteBase: (id: string) =>
+    adminFetch(`/api/admin/bases/${id}`, { method: 'DELETE' }),
 };

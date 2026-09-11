@@ -3,6 +3,8 @@ import { createNoticeRouter } from './notice.routes.js';
 import { createFleetRouter } from './fleet.routes.js';
 import { createContentRouter } from './content.routes.js';
 import { createCommodityRouter } from './commodity.routes.js';
+import { createBannerRouter } from './banner.routes.js';
+import { createBaseRouter } from './base.routes.js';
 
 export function createMainRouter(): Router {
   const router = Router();
@@ -21,18 +23,24 @@ export function createMainRouter(): Router {
   const { publicRouter: fleetPublic, adminRouter: fleetAdmin } = createFleetRouter();
   const { publicRouter: contentPublic, adminRouter: contentAdmin } = createContentRouter();
   const { publicRouter: commodityPublic, adminRouter: commodityAdmin } = createCommodityRouter();
+  const { publicRouter: bannerPublic, adminRouter: bannerAdmin } = createBannerRouter();
+  const { publicRouter: basePublic, adminRouter: baseAdmin } = createBaseRouter();
 
   // Rotas Públicas
   router.use('/notices', noticePublic);
   router.use('/fleet', fleetPublic);
   router.use('/content', contentPublic);
   router.use('/commodities', commodityPublic);
+  router.use('/banners', bannerPublic);
+  router.use('/bases', basePublic);
 
   // Rotas Administrativas (Protegidas por authMiddleware + adminMiddleware)
   router.use('/admin/notices', noticeAdmin);
   router.use('/admin/fleet', fleetAdmin);
   router.use('/admin/content', contentAdmin);
   router.use('/admin/commodities', commodityAdmin);
+  router.use('/admin/banners', bannerAdmin);
+  router.use('/admin/bases', baseAdmin);
 
   return router;
 }

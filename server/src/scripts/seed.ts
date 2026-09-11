@@ -4,6 +4,8 @@ import { ENV } from '../config/env.js';
 import { NoticeRepository } from '../repositories/notice.repository.js';
 import { FleetRepository } from '../repositories/fleet.repository.js';
 import { ContentRepository } from '../repositories/content.repository.js';
+import { BannerRepository } from '../repositories/banner.repository.js';
+import { BaseRepository } from '../repositories/base.repository.js';
 
 // Links do Google Drive fornecidos pelo usuário
 const imagensFrotaLinks = [
@@ -98,6 +100,41 @@ async function seed() {
       );
     }
 
+    // 0. Seed de Banners Principais do Topo (Carrossel)
+    console.log('[Seed] Atualizando Banners Principais do Topo...');
+    const bannerRepo = new BannerRepository();
+    await db.collection('banners').deleteMany({});
+
+    await bannerRepo.create({
+      title: 'TRR KRUPINSKI',
+      description: 'Entregando qualidade a mais de 30 anos',
+      imageUrl: '/images/Gemini_Generated_Image_ywuiheywuiheywui.jpg',
+      order: 1,
+      active: true,
+      linkUrl: '#sobre',
+      linkText: 'Conheça Nossa História',
+    });
+
+    await bannerRepo.create({
+      title: 'Plantão Safra 2026',
+      description: 'Abastecimento direto na lavoura com diesel certificado e pontualidade',
+      imageUrl: '/images/agro-harvest.jpg',
+      order: 2,
+      active: true,
+      linkUrl: 'https://wa.me/5569999952942',
+      linkText: 'Fale com o Plantão',
+    });
+
+    await bannerRepo.create({
+      title: 'Frota Própria e Calibrada',
+      description: 'Transporte e entrega com máxima precisão e segurança para sua propriedade',
+      imageUrl: '/images/hero-truck.jpg',
+      order: 3,
+      active: true,
+      linkUrl: '#frota',
+      linkText: 'Ver Nossa Frota',
+    });
+
     // 1. Seed de Avisos / Notícias
     console.log('[Seed] Atualizando Quadro de Avisos com imagens dos banners...');
     const noticeRepo = new NoticeRepository();
@@ -186,7 +223,7 @@ async function seed() {
     });
 
     // B. Bases Operacionais
-    await contentRepo.upsert('company_bases', [
+    const basesData = [
       {
         id: 'vilhena',
         name: 'Base Central & Matriz Vilhena',
@@ -255,13 +292,24 @@ async function seed() {
         wazeUrl: 'https://www.waze.com/ul?q=Aripuana+MT&navigate=yes',
         embedUrl: 'https://maps.google.com/maps?q=Aripuana+MT&hl=pt-BR&z=14&output=embed',
       },
-    ]);
+    ];
 
-    // C. Seção Hero
+    await contentRepo.upsert('company_bases', basesData);
+
+    const baseRepo = new BaseRepository();
+    await db.collection('operational_bases').deleteMany({});
+    for (let i = 0; i < basesData.length; i++) {
+      await baseRepo.create({
+        ...basesData[i],
+        order: i + 1,
+        active: true,
+      });
+    }
+
+    // C. Seção Hero (Mantém estritamente Título, Descrição e Imagem)
     await contentRepo.upsert('company_hero', {
       headline: 'Combustível no Seu Tanque, Onde Sua Operação Estiver',
       subheadline: 'Mais de 30 anos abastecendo a safra e as frotas de Rondônia e Mato Grosso com qualidade certificada ANP e pontualidade máxima.',
-      badge: '30+ Anos de Tradição e Excelência',
       imageUrl: formatGoogleDriveUrl(imagensBannerLinks[2] || imagensFrotaLinks[0]),
     });
 

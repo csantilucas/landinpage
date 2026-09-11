@@ -33,7 +33,6 @@ export default function AdminConteudoPage() {
 
   // 1. Estado do Hero (com suporte a imagem editável)
   const [heroContent, setHeroContent] = useState({
-    badge: '30+ Anos de Tradição e Excelência',
     headline: 'Combustível no Seu Tanque, Onde Sua Operação Estiver',
     subheadline:
       'Mais de 30 anos abastecendo a safra e as frotas de Rondônia e Mato Grosso com qualidade certificada ANP e pontualidade máxima.',
@@ -204,9 +203,9 @@ export default function AdminConteudoPage() {
       // 1. Salva os textos das seções
       const promises: Promise<any>[] = [
         adminApi.updateContent('company_hero', {
-          badge: heroContent.badge,
           headline: heroContent.headline,
           subheadline: heroContent.subheadline,
+          imageUrl: heroContent.imageUrl,
         }),
         adminApi.updateContent('company_about', {
           headline: aboutContent.headline,
@@ -287,7 +286,7 @@ export default function AdminConteudoPage() {
   };
 
   // Handlers para Hero
-  const handleHeroChange = (field: 'badge' | 'headline' | 'subheadline' | 'imageUrl', value: string) => {
+  const handleHeroChange = (field: 'headline' | 'subheadline' | 'imageUrl', value: string) => {
     setHeroContent((prev) => ({ ...prev, [field]: value }));
   };
 
