@@ -6,6 +6,8 @@ import { ENV, getAllowedOrigins } from '../config/env.js';
 let authInstance: any = null;
 
 export function initAuth(db: Db) {
+  if (authInstance) return authInstance;
+
   authInstance = betterAuth({
     database: mongodbAdapter(db),
     secret: ENV.BETTER_AUTH_SECRET,
@@ -34,7 +36,7 @@ export function initAuth(db: Db) {
     trustedOrigins: (request) => {
       const origin = request?.headers?.get('origin');
       const referer = request?.headers?.get('referer');
-      const origins: string[] = getAllowedOrigins();
+      const origins: string[] = [...getAllowedOrigins()];
       if (origin && !origins.includes(origin)) origins.push(origin);
       if (referer) {
         try {

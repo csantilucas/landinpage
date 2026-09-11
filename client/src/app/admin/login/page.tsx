@@ -1,16 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Lock, Mail, ArrowRight, Loader2, AlertCircle } from 'lucide-react';
-import { signIn } from '@/lib/auth-client';
+import { signIn, useSession } from '@/lib/auth-client';
 
 export default function AdminLoginPage() {
-  const router = useRouter();
+  const { data: session, isPending: sessionLoading } = useSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Se o usuário já estiver autenticado, redireciona diretamente ao painel
+  useEffect(() => {
+    if (!sessionLoading && session?.user) {
+      window.location.replace('/admin');
+    }
+  }, [session, sessionLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +36,9 @@ export default function AdminLoginPage() {
           setError(res.error.message || 'Credenciais inválidas. Verifique seu e-mail e senha.');
         }
       } else {
-        router.push('/admin');
+        // Redirecionamento completo do navegador para persistência segura de cookies cross-site
+        // e prevenção de condição de corrida com o cache de sessão do client
+        window.location.href = '/admin';
       }
     } catch (err: any) {
       setError(err?.message || 'Falha ao conectar com o servidor de autenticação.');

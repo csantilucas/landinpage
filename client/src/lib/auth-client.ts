@@ -7,6 +7,9 @@ export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const authClient = createAuthClient({
   baseURL: API_BASE_URL,
+  fetchOptions: {
+    credentials: 'include',
+  },
 });
 
 export const { signIn, signUp, signOut, useSession } = authClient;

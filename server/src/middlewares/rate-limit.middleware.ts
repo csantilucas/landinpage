@@ -6,7 +6,7 @@ import rateLimit from 'express-rate-limit';
  */
 export const loginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // Janela de 15 minutos
-  max: 5, // Limite máximo de 5 tentativas por IP
+  max: 30, // Limite seguro para evitar bloqueios acidentais durante cold starts
   standardHeaders: true, // Retorna cabeçalhos padronizados RateLimit-* (RFC)
   legacyHeaders: false, // Desativa cabeçalhos antigos X-RateLimit-*
   statusCode: 429,

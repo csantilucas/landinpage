@@ -3,22 +3,30 @@ import { ENV } from './env.js';
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
+let connectPromise: Promise<Db> | null = null;
 
 export async function connectDB(): Promise<Db> {
   if (db) return db;
+  if (connectPromise) return connectPromise;
 
-  try {
-    client = new MongoClient(ENV.MONGODB_URI!, {
-      serverSelectionTimeoutMS: 5000,
-    });
-    await client.connect();
-    db = client.db();
-    console.log(`[Database] Conectado ao MongoDB com sucesso: ${db.databaseName}`);
-    return db;
-  } catch (error) {
-    console.error('[Database] Erro ao conectar ao MongoDB:', error);
-    throw error;
-  }
+  connectPromise = (async () => {
+    try {
+      client = new MongoClient(ENV.MONGODB_URI!, {
+        serverSelectionTimeoutMS: 5000,
+        maxPoolSize: 10,
+      });
+      await client.connect();
+      db = client.db();
+      console.log(`[Database] Conectado ao MongoDB com sucesso: ${db.databaseName}`);
+      return db;
+    } catch (error) {
+      connectPromise = null;
+      console.error('[Database] Erro ao conectar ao MongoDB:', error);
+      throw error;
+    }
+  })();
+
+  return connectPromise;
 }
 
 export function getDB(): Db {

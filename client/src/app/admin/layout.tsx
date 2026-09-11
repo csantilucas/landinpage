@@ -64,7 +64,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await signOut();
-    router.push('/admin/login');
+    window.location.href = '/admin/login';
   };
 
   return (

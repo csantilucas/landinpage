@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import { ENV, getAllowedOrigins } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
-import { initAuth } from './auth/better-auth.js';
+import { initAuth, getAuth } from './auth/better-auth.js';
+import { toNodeHandler } from 'better-auth/node';
+import { loginRateLimiter } from './middlewares/rate-limit.middleware.js';
 import { createMainRouter } from './routes/index.js';
 import { commodityService } from './services/commodity.service.js';
 
@@ -56,11 +58,18 @@ export async function getApp(): Promise<express.Express> {
       app.use(corsMiddleware);
       app.options('*', corsMiddleware);
 
-      // Parse JSON
+      // Rate limiter nas rotas de login do Better Auth
+      app.post(['/api/auth/sign-in', '/api/auth/sign-in/*'], loginRateLimiter);
+
+      // Handler do Better Auth montado ANTES de express.json()
+      // Isso é fundamental para evitar a condição de corrida no stream da requisição (body stream)
+      app.all(['/api/auth', '/api/auth/*'], toNodeHandler(getAuth()));
+
+      // Parse JSON e urlencoded APENAS após o Better Auth
       app.use(express.json());
       app.use(express.urlencoded({ extended: true }));
 
-      // Montagem da API
+      // Montagem das rotas da API
       app.use('/api', createMainRouter());
 
       // Middleware de erro 404
