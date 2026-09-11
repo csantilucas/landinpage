@@ -23,11 +23,10 @@ export function initAuth(db: Db) {
         },
       },
     },
-    trustedOrigins: [
-      ENV.CLIENT_URL,
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-    ].filter((origin): origin is string => Boolean(origin)),
+    trustedOrigins: (request) => {
+      const origin = request?.headers?.get('origin');
+      return origin ? [origin] : [];
+    },
   });
 
   return authInstance;

@@ -22,27 +22,11 @@ export async function getApp(): Promise<express.Express> {
 
     const app = express();
 
-    // CORS configurado para ENV.CLIENT_URL e ambiente local
-    const isAllowedOrigin = (origin?: string) => {
-      if (!origin) return true;
-      if (
-        (ENV.CLIENT_URL && origin === ENV.CLIENT_URL) ||
-        origin.includes('localhost') ||
-        origin.includes('127.0.0.1')
-      ) {
-        return true;
-      }
-      return false;
-    };
-
+    // CORS liberado para todas as origens e IPs com suporte a credenciais
     app.use(
       cors({
-        origin: (origin, callback) => {
-          if (isAllowedOrigin(origin)) {
-            callback(null, origin || true);
-          } else {
-            callback(null, false);
-          }
+        origin: (_origin, callback) => {
+          callback(null, true);
         },
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
