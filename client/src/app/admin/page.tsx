@@ -4,14 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import {
   Bell,
-  Truck,
   FileText,
-  CheckCircle2,
-  AlertTriangle,
-  ArrowUpRight,
-  Shield,
+  ArrowRight,
+  Plus,
   Layers,
   Image as ImageIcon,
+  CheckCircle2,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '@/lib/api';
@@ -39,175 +37,167 @@ export default function AdminDashboardPage() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Boas-vindas */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="space-y-6">
+      {/* Top Banner de Boas-vindas Limpo */}
+      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Sistema Operacional & Autenticado</span>
+            <span>Painel Ativo</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
             Painel de Controle • TRR Krupinski
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Gerencie avisos de safra, links das fotos da frota e textos institucionais da landing page.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Gerencie comunicados, fotos da frota, textos institucionais e o layout da página inicial.
           </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <Link
             href="/admin/avisos"
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
           >
-            <Bell className="w-3.5 h-3.5" />
+            <Plus className="w-4 h-4" />
             <span>Novo Aviso</span>
           </Link>
           <Link
             href="/admin/imagens"
-            className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs font-bold rounded-xl transition-all flex items-center gap-1.5"
           >
-            <ImageIcon className="w-3.5 h-3.5 text-slate-600" />
-            <span>Gerenciar Imagens</span>
+            <ImageIcon className="w-4 h-4 text-slate-600" />
+            <span>Fotos</span>
           </Link>
         </div>
       </div>
 
-      {/* Cards de Métricas Rápidas */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Grid de Seções de Gerenciamento - Direto e sem textos desnecessários */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         
-        {/* Card Avisos */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-500/50 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <Bell className="w-5 h-5" />
-            </div>
-            <Link
-              href="/admin/avisos"
-              className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"
-            >
-              <span>Gerenciar</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="text-3xl font-black text-slate-900">
-            {loading ? '...' : stats.activeNoticesCount}
-          </div>
-          <div className="text-xs font-semibold text-slate-600 mt-1">
-            Avisos Ativos no Site ({stats.noticesCount} total)
-          </div>
-          <p className="text-[11px] text-slate-400 mt-2">
-            Mensagens de plantão, avisos de safra e comunicados exibidos no topo do site.
-          </p>
-        </div>
-
-        {/* Card Imagens do Site */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-500/50 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <ImageIcon className="w-5 h-5" />
-            </div>
-            <Link
-              href="/admin/imagens"
-              className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-            >
-              <span>Gerenciar</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="text-3xl font-black text-slate-900">
-            {loading ? '...' : stats.activeFleetCount}
-          </div>
-          <div className="text-xs font-semibold text-slate-600 mt-1">
-            Imagens Ativas do Site ({stats.fleetCount} cadastradas)
-          </div>
-          <p className="text-[11px] text-slate-400 mt-2">
-            Fotos do carrossel da frota, banner hero, seção sobre e cards da página.
-          </p>
-        </div>
-
-        {/* Card Textos / Conteúdo */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-500/50 transition-all">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <FileText className="w-5 h-5" />
-            </div>
-            <Link
-              href="/admin/conteudo"
-              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
-            >
-              <span>Editar</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="text-3xl font-black text-slate-900">
-            100%
-          </div>
-          <div className="text-xs font-semibold text-slate-600 mt-1">
-            Textos Institucionais & Produtos
-          </div>
-          <p className="text-[11px] text-slate-400 mt-2">
-            Edição de títulos, história, contadores de confiança e produtos/serviços.
-          </p>
-        </div>
-
-        {/* Card Layout & Seções */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-500/50 transition-all sm:col-span-2 lg:col-span-3">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
-              <Layers className="w-5 h-5" />
-            </div>
-            <Link
-              href="/admin/secoes"
-              className="text-xs font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1"
-            >
-              <span>Organizar Seções</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <div className="text-lg font-black text-slate-900">
-                Disposição de Seções (Kanban Vertical)
+        {/* 1. Quadro de Avisos & Notícias */}
+        <Link
+          href="/admin/avisos"
+          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Bell className="w-5 h-5" />
               </div>
-              <p className="text-xs text-slate-500 mt-1">
-                Alterne a posição de exibição vertical do Hero, Avisos, Frota, Serviços, Bases e Contato com arrastar e soltar ou botões de subir/descer.
-              </p>
+              <span className="text-xs font-bold text-amber-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
             </div>
-            <Link
-              href="/admin/secoes"
-              className="px-4 py-2 bg-amber-500 text-slate-950 hover:bg-amber-400 text-xs font-bold rounded-xl transition-all shadow-xs shrink-0 text-center"
-            >
-              Acessar Kanban de Layout →
-            </Link>
+            <h2 className="text-base font-bold text-slate-900">
+              Quadro de Avisos & Notícias
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Publique comunicados e notícias com fotos em destaque e botões de ação na página inicial.
+            </p>
           </div>
-        </div>
 
-      </div>
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-medium">Avisos ativos no site:</span>
+            <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+              {loading ? '...' : `${stats.activeNoticesCount} de ${stats.noticesCount}`}
+            </span>
+          </div>
+        </Link>
 
-      {/* Informações Técnicas da Arquitetura - Estilo Claro */}
-      <div className="bg-white text-slate-900 rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-xs">
-        <div className="flex items-center gap-2 text-amber-600 font-bold text-xs uppercase tracking-wider mb-2">
-          <Shield className="w-4 h-4" />
-          <span>Estrutura & Segurança</span>
-        </div>
-        <h2 className="text-lg font-bold text-slate-900">
-          Arquitetura em Camadas com Better Auth & MongoDB
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5 pt-5 border-t border-slate-100 text-xs text-slate-600">
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-            <strong className="block text-slate-900 mb-1">Routes & Middlewares</strong>
-            Endpoints protegidos por sessão criptografada e verificação de privilégio administrativo.
+        {/* 2. Fotos do Site */}
+        <Link
+          href="/admin/imagens"
+          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                <ImageIcon className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-blue-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-slate-900">
+              Fotos do Site
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Gerencie as fotos da frota de caminhões, banner inicial, colheita e seções institucionais.
+            </p>
           </div>
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-            <strong className="block text-slate-900 mb-1">Services & Repositories</strong>
-            Regras de negócio isoladas com persistência desacoplada em coleções MongoDB.
+
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-medium">Fotos cadastradas:</span>
+            <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+              {loading ? '...' : `${stats.activeFleetCount} ativas`}
+            </span>
           </div>
-          <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
-            <strong className="block text-slate-900 mb-1">Armazenamento de Fotos</strong>
-            Registro de links diretos de imagens (URLs públicas), garantindo velocidade e leveza.
+        </Link>
+
+        {/* 3. Textos do Site */}
+        <Link
+          href="/admin/conteudo"
+          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <FileText className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-emerald-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-slate-900">
+              Textos & Informações
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Atualize títulos, história da empresa, números de confiança, produtos e telefones de atendimento.
+            </p>
           </div>
-        </div>
+
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-medium">Seções editáveis:</span>
+            <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-lg">
+              Hero, Sobre, Serviços, Contato
+            </span>
+          </div>
+        </Link>
+
+        {/* 4. Ordem das Seções */}
+        <Link
+          href="/admin/secoes"
+          className="group bg-white rounded-2xl p-6 border border-slate-200 shadow-xs hover:border-amber-400 hover:shadow-md transition-all flex flex-col justify-between"
+        >
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+                <Layers className="w-5 h-5" />
+              </div>
+              <span className="text-xs font-bold text-amber-600 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                <span>Acessar</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-slate-900">
+              Ordem das Seções
+            </h2>
+            <p className="text-xs text-slate-500 mt-1">
+              Alterne a ordem vertical de exibição dos blocos da página principal ou oculte seções específicas.
+            </p>
+          </div>
+
+          <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
+            <span className="text-slate-500 font-medium">Disposição da página:</span>
+            <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-lg">
+              Personalizável
+            </span>
+          </div>
+        </Link>
+
       </div>
     </div>
   );

@@ -1,10 +1,21 @@
+'use client';
+
 import React from 'react';
 import Image from 'next/image';
-import { ShieldCheck } from 'lucide-react';
-import { COMPANY_INFO } from '@/data/companyData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSiteContent, CompanyInfo } from '@/lib/api';
+import { FALLBACK_COMPANY_INFO } from '@/data/fallbackData';
 import logoImg from '@/app/logo.png';
 
 export default function Footer() {
+  const { data: siteContent } = useQuery({
+    queryKey: ['siteContent'],
+    queryFn: () => fetchSiteContent(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const companyInfo: Partial<CompanyInfo> = siteContent?.company_info || FALLBACK_COMPANY_INFO;
+
   return (
     <footer className="bg-slate-100 text-slate-600 border-t border-slate-200 py-10 text-xs">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,10 +33,10 @@ export default function Footer() {
             </div>
             <div>
               <div className="font-bold text-slate-900 text-sm">
-                TRR Krupinski
+                {companyInfo.name || 'TRR Krupinski'}
               </div>
               <div className="text-[11px] text-slate-500">
-                Comércio e Transporte de Combustíveis Krupinski Ltda
+                {companyInfo.fullName || 'Comércio e Transporte de Combustíveis Krupinski Ltda'}
               </div>
             </div>
           </div>
@@ -34,14 +45,14 @@ export default function Footer() {
           <div className="flex items-center gap-4 text-[11px] text-slate-500">
             <span>Homologado ANP</span>
             <span>•</span>
-            <span>ANTT RNTRC {COMPANY_INFO.anttRegister}</span>
+            <span>ANTT {companyInfo.anttRegister || 'RNTRC 001952720'}</span>
             <span>•</span>
-            <span>Desde 1995</span>
+            <span>Desde {companyInfo.foundedYear || 1995}</span>
           </div>
 
           {/* Copyright */}
           <div className="text-slate-500 text-center md:text-right">
-            © {new Date().getFullYear()} TRR Krupinski. Todos os direitos reservados.
+            © {new Date().getFullYear()} {companyInfo.name || 'TRR Krupinski'}. Todos os direitos reservados.
           </div>
 
         </div>

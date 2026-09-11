@@ -24,7 +24,11 @@ export default function AdminLoginPage() {
       });
 
       if (res.error) {
-        setError(res.error.message || 'Credenciais inválidas. Verifique seu e-mail e senha.');
+        if ((res.error as any).status === 429) {
+          setError(res.error.message || 'Muitas tentativas de login a partir deste IP. Por segurança, aguarde 15 minutos antes de tentar novamente.');
+        } else {
+          setError(res.error.message || 'Credenciais inválidas. Verifique seu e-mail e senha.');
+        }
       } else {
         router.push('/admin');
       }

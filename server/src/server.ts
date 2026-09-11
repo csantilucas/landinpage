@@ -4,6 +4,7 @@ import { ENV } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
 import { initAuth } from './auth/better-auth.js';
 import { createMainRouter } from './routes/index.js';
+import { commodityService } from './services/commodity.service.js';
 
 async function bootstrap() {
   try {
@@ -12,6 +13,9 @@ async function bootstrap() {
 
     console.log('[Server] Inicializando Better Auth com adaptador MongoDB...');
     initAuth(db);
+
+    // Inicia agendador horário de commodities
+    commodityService.startScheduledSync();
 
     const app = express();
 
@@ -48,6 +52,7 @@ async function bootstrap() {
 
     const handleShutdown = async () => {
       console.log('\n[Server] Encerrando servidor de forma segura...');
+      commodityService.stopScheduledSync();
       server.close(async () => {
         await closeDB();
         process.exit(0);

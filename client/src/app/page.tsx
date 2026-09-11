@@ -15,10 +15,11 @@ import AdminGearButton from '@/components/AdminGearButton';
 import ScrollProgressBar from '@/components/ScrollProgressBar';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSiteContent, SectionOrderItem } from '@/lib/api';
+import { CommoditiesTestTicker } from '@/components/OilTracker';
 
 const DEFAULT_SECTIONS: SectionOrderItem[] = [
   { id: 'hero', name: 'Seção Inicial (Hero)', enabled: true, order: 1 },
-  { id: 'notices', name: 'Carrossel de Avisos & Plantão', enabled: true, order: 2 },
+  { id: 'notices', name: 'Quadro de Avisos & Notícias', enabled: true, order: 2 },
   { id: 'about', name: 'A Empresa & Métricas', enabled: true, order: 3 },
   { id: 'fleet', name: 'Nossa Frota', enabled: true, order: 4 },
   { id: 'services', name: 'Produtos e Serviços', enabled: true, order: 5 },
@@ -62,9 +63,12 @@ export default function Home() {
         {activeSections.map((sec) => SECTION_COMPONENTS[sec.id] || null)}
       </main>
 
+      <CommoditiesTestTicker />
       <Footer />
       <FloatingWhatsApp />
       <AdminGearButton />
+
+
     </div>
   );
 }

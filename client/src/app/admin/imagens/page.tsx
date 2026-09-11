@@ -21,7 +21,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FleetItem, adminApi } from '@/lib/api';
+import { FleetItem, adminApi, formatImageUrl } from '@/lib/api';
 
 interface SectionConfig {
   id: string;
@@ -53,20 +53,6 @@ const SECTIONS_CONFIG: SectionConfig[] = [
     badge: 'Sobre',
     icon: Building2,
   },
-  {
-    id: 'servicos',
-    name: 'Cards de Produtos & Serviços',
-    description: 'Fotos e ilustrações complementares dos cards de fornecimento, diesel e transporte.',
-    badge: 'Cards',
-    icon: Fuel,
-  },
-  {
-    id: 'geral',
-    name: 'Geral / Outras Imagens',
-    description: 'Imagens institucionais, logotipos ou banners secundários do site.',
-    badge: 'Geral',
-    icon: ImageIcon,
-  },
 ];
 
 export default function AdminImagensPage() {
@@ -80,8 +66,6 @@ export default function AdminImagensPage() {
     carrossel: true,
     hero: true,
     sobre: true,
-    servicos: true,
-    geral: true,
   });
 
   // Form State
@@ -328,7 +312,7 @@ export default function AdminImagensPage() {
                             {/* Preview da Foto */}
                             <div className="relative aspect-[16/10] bg-slate-100 overflow-hidden group">
                               <img
-                                src={img.imageUrl}
+                                src={formatImageUrl(img.imageUrl)}
                                 alt={img.title}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 onError={(e) => {
@@ -500,7 +484,7 @@ export default function AdminImagensPage() {
 
                     <div className="relative aspect-[16/9] max-h-48 rounded-lg overflow-hidden bg-slate-200 border border-slate-300 flex items-center justify-center">
                       <img
-                        src={formData.imageUrl}
+                        src={formatImageUrl(formData.imageUrl)}
                         alt="Prévia da foto"
                         className="w-full h-full object-cover"
                         onError={(e) => {

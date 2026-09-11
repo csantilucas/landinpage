@@ -35,8 +35,8 @@ const DEFAULT_SECTIONS: SectionOrderItem[] = [
   },
   {
     id: 'notices',
-    name: 'Carrossel de Avisos & Plantão',
-    description: 'Carrossel dinâmico com comunicados urgentes, plantão de safra e alertas da empresa.',
+    name: 'Quadro de Avisos & Notícias',
+    description: 'Notícias em destaque e comunicados com foto e botão de ação na página inicial.',
     enabled: true,
     order: 2,
   },

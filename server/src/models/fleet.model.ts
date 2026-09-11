@@ -7,7 +7,7 @@ export interface FleetItem {
   imageUrl: string;
   order: number;
   active: boolean;
-  category?: 'carrossel' | 'hero' | 'sobre' | 'servicos' | 'geral' | string;
+  category?: 'carrossel' | 'hero' | 'sobre' | string;
   createdAt: Date;
   updatedAt: Date;
 }

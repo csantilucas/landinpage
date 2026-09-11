@@ -20,6 +20,7 @@ export class ContentController {
         res.status(404).json({ success: false, error: 'Conteúdo não encontrado' });
         return;
       }
+
       res.json({ success: true, data });
     } catch (error: any) {
       res.status(500).json({ success: false, error: error.message });
@@ -29,6 +30,7 @@ export class ContentController {
   update = async (req: Request, res: Response): Promise<void> => {
     try {
       const updated = await this.contentService.updateContent(req.params.key, req.body);
+      console.log(updated)
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

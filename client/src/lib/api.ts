@@ -3,13 +3,14 @@ import { API_BASE_URL } from './auth-client';
 export interface Notice {
   _id: string;
   title: string;
-  message: string;
-  type: 'info' | 'warning' | 'alert' | 'success';
+  description?: string;
+  message?: string;
   active: boolean;
-  priority: number;
   imageUrl?: string;
   linkUrl?: string;
   linkText?: string;
+  type?: string;
+  priority?: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,7 +22,7 @@ export interface FleetItem {
   imageUrl: string;
   order: number;
   active: boolean;
-  category?: 'carrossel' | 'hero' | 'sobre' | 'servicos' | 'geral' | string;
+  category?: 'carrossel' | 'hero' | 'sobre' | string;
   createdAt: string;
   updatedAt: string;
 }
@@ -34,6 +35,63 @@ export interface SectionOrderItem {
   description?: string;
   enabled: boolean;
   order: number;
+}
+
+export interface CompanyInfo {
+  name: string;
+  fullName: string;
+  foundedYear: number;
+  yearsOfExperience?: number;
+  anttRegister: string;
+  anpCompliant: boolean;
+  matrizAddress: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  googleMapsUrl: string;
+  googleMapsRouteUrl?: string;
+  wazeUrl?: string;
+  googleMapsEmbed?: string;
+  mainPhone: string;
+  mainEmergencyPhone?: string;
+  mainWhatsApp: string;
+  email: string;
+  hours?: string;
+}
+
+export interface OperationalBase {
+  id: string;
+  name: string;
+  city: string;
+  state: 'RO' | 'MT' | string;
+  type: string;
+  address: string;
+  phones: string[];
+  whatsappNumber: string;
+  whatsappDisplay: string;
+  coverage: string;
+  highlights: string[];
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  googleMapsUrl: string;
+  embedUrl: string;
+  wazeUrl?: string;
+}
+
+/**
+ * Converte links compartilhados do Google Drive em links diretos de imagem
+ */
+export function formatImageUrl(url?: string, fallback: string = ''): string {
+  if (!url) return fallback;
+  const trimmed = url.trim();
+  const match = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (match && match[1]) {
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
+  }
+  return trimmed;
 }
 
 // -------------------------------------------------------------
@@ -80,6 +138,76 @@ export async function fetchSiteContent(key?: string): Promise<any> {
   } catch (error) {
     console.error('Erro ao buscar conteúdos:', error);
     return key ? null : {};
+  }
+}
+
+export interface CommodityItem {
+  id: string;
+  name: string;
+  symbol: string;
+  category: 'fuel' | 'oil' | 'agro';
+  unitOriginal: string;
+  unitBrl: string;
+  priceUsd: number;
+  priceBrl: number;
+  change: string;
+  isPositive: boolean;
+  history: number[];
+}
+
+export interface CommoditiesData {
+  items: CommodityItem[];
+  usdToBrl: number;
+  updatedAt: string;
+  nextUpdateAt: string;
+  source: 'commodities-api' | 'cache' | 'fallback';
+  isStale?: boolean;
+  isAvailable?: boolean;
+  message?: string;
+}
+
+export async function fetchCommodities(): Promise<CommoditiesData | null> {
+  // 1. Tenta a Route Handler interna do Next.js (/api/market-prices) com cache automático na Vercel
+  try {
+    const isBrowser = typeof window !== 'undefined';
+    const baseUrl = isBrowser ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+    const localRes = await fetch(`${baseUrl}/api/market-prices`, {
+      next: { revalidate: 60 },
+    });
+    if (localRes.ok) {
+      const json = await localRes.json();
+      if (json.success && json.data) return json.data;
+    }
+  } catch {
+    // Fallback silencioso para o backend Express
+  }
+
+  // 2. Fallback para o backend Express (/api/commodities)
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/commodities`, {
+      next: { revalidate: 60 },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Erro ao buscar cotações de commodities:', error);
+    return null;
+  }
+}
+
+export async function refreshCommodities(): Promise<CommoditiesData | null> {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/commodities/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.success ? data.data : null;
+  } catch (error) {
+    console.error('Erro ao atualizar commodities no backend:', error);
+    return null;
   }
 }
 

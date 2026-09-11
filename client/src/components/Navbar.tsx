@@ -3,11 +3,23 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Phone, Menu, X, MessageSquare } from 'lucide-react';
-import { COMPANY_INFO } from '@/data/companyData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSiteContent, CompanyInfo } from '@/lib/api';
+import { FALLBACK_COMPANY_INFO } from '@/data/fallbackData';
 import logoImg from '@/app/logo.png';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const { data: siteContent } = useQuery({
+    queryKey: ['siteContent'],
+    queryFn: () => fetchSiteContent(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const companyInfo: Partial<CompanyInfo> = siteContent?.company_info || FALLBACK_COMPANY_INFO;
+  const mainPhone = companyInfo.mainPhone || FALLBACK_COMPANY_INFO.mainPhone;
+  const mainWhatsApp = companyInfo.mainWhatsApp || FALLBACK_COMPANY_INFO.mainWhatsApp;
 
   return (
     <header className="sticky top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
@@ -48,15 +60,15 @@ export default function Navbar() {
           {/* Quick Contact Action */}
           <div className="hidden sm:flex items-center gap-3">
             <a
-              href={`tel:${COMPANY_INFO.mainPhone.replace(/\D/g, '')}`}
+              href={`tel:${mainPhone.replace(/\D/g, '')}`}
               className="text-xs font-semibold text-slate-700 hover:text-amber-600 transition-colors flex items-center gap-1.5"
             >
               <Phone className="w-4 h-4 text-amber-500" />
-              <span>{COMPANY_INFO.mainPhone}</span>
+              <span>{mainPhone || 'Atendimento'}</span>
             </a>
 
             <a
-              href={`https://wa.me/${COMPANY_INFO.mainWhatsApp}?text=${encodeURIComponent('Olá! Gostaria de informações sobre a TRR Krupinski.')}`}
+              href={`https://wa.me/${mainWhatsApp}?text=${encodeURIComponent('Olá! Gostaria de informações sobre a TRR Krupinski.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-sm flex items-center gap-1.5 transition-colors"
@@ -91,13 +103,13 @@ export default function Navbar() {
           </nav>
           <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
             <a
-              href={`tel:${COMPANY_INFO.mainPhone.replace(/\D/g, '')}`}
+              href={`tel:${mainPhone.replace(/\D/g, '')}`}
               className="py-2.5 text-center text-xs font-semibold text-slate-800 bg-slate-100 rounded-lg"
             >
-              Ligar: {COMPANY_INFO.mainPhone}
+              Ligar: {mainPhone || 'Atendimento'}
             </a>
             <a
-              href={`https://wa.me/${COMPANY_INFO.mainWhatsApp}?text=${encodeURIComponent('Olá! Gostaria de falar com a TRR Krupinski.')}`}
+              href={`https://wa.me/${mainWhatsApp}?text=${encodeURIComponent('Olá! Gostaria de falar com a TRR Krupinski.')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="py-2.5 text-center text-xs font-bold text-white bg-emerald-600 rounded-lg flex items-center justify-center gap-1.5"

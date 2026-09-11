@@ -24,19 +24,21 @@ export class NoticeService {
     if (!data.title?.trim()) {
       throw new Error('O título do aviso é obrigatório');
     }
-    if (!data.message?.trim()) {
-      throw new Error('A mensagem do aviso é obrigatória');
+    const description = (data.description || data.message || '').trim();
+    if (!description) {
+      throw new Error('A descrição do aviso é obrigatória');
     }
 
     const payload: CreateNoticeDTO = {
       title: data.title.trim(),
-      message: data.message.trim(),
-      type: data.type || 'info',
+      description: description,
+      message: description,
       active: data.active ?? true,
-      priority: Number(data.priority) || 0,
       imageUrl: data.imageUrl?.trim() || undefined,
       linkUrl: data.linkUrl?.trim() || undefined,
       linkText: data.linkText?.trim() || undefined,
+      type: data.type || undefined,
+      priority: Number(data.priority) || 0,
     };
 
     return this.noticeRepo.create(payload);
@@ -48,12 +50,14 @@ export class NoticeService {
       throw new Error('Aviso não encontrado para atualização');
     }
 
+    const description = data.description !== undefined 
+      ? data.description.trim() 
+      : (data.message !== undefined ? data.message.trim() : undefined);
+
     const payload: UpdateNoticeDTO = {
       ...(data.title !== undefined && { title: data.title.trim() }),
-      ...(data.message !== undefined && { message: data.message.trim() }),
-      ...(data.type !== undefined && { type: data.type }),
+      ...(description !== undefined && { description, message: description }),
       ...(data.active !== undefined && { active: Boolean(data.active) }),
-      ...(data.priority !== undefined && { priority: Number(data.priority) }),
       ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl.trim() || undefined }),
       ...(data.linkUrl !== undefined && { linkUrl: data.linkUrl.trim() || undefined }),
       ...(data.linkText !== undefined && { linkText: data.linkText.trim() || undefined }),

@@ -55,11 +55,11 @@ export default function AdminLayout({
   }
 
   const navItems = [
-    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/admin/secoes', label: 'Layout & Seções (Kanban)', icon: Layers },
-    { href: '/admin/avisos', label: 'Avisos & Plantões', icon: Bell },
-    { href: '/admin/imagens', label: 'Gerenciar Imagens', icon: ImageIcon },
-    { href: '/admin/conteudo', label: 'Textos & Conteúdo', icon: FileText },
+    { href: '/admin', label: 'Início', icon: LayoutDashboard },
+    { href: '/admin/avisos', label: 'Quadro de Avisos', icon: Bell },
+    { href: '/admin/imagens', label: 'Fotos do Site', icon: ImageIcon },
+    { href: '/admin/conteudo', label: 'Textos do Site', icon: FileText },
+    { href: '/admin/secoes', label: 'Ordem das Seções', icon: Layers },
   ];
 
   const handleLogout = async () => {

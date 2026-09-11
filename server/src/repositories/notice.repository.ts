@@ -10,14 +10,14 @@ export class NoticeRepository {
   async findAll(): Promise<Notice[]> {
     return this.collection
       .find({})
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ createdAt: -1 })
       .toArray();
   }
 
   async findActive(): Promise<Notice[]> {
     return this.collection
       .find({ active: true })
-      .sort({ priority: -1, createdAt: -1 })
+      .sort({ createdAt: -1 })
       .toArray();
   }
 
@@ -27,8 +27,17 @@ export class NoticeRepository {
   }
 
   async create(data: CreateNoticeDTO): Promise<Notice> {
+    const description = data.description || data.message || '';
     const doc: Notice = {
-      ...data,
+      title: data.title,
+      description,
+      message: description,
+      imageUrl: data.imageUrl,
+      linkUrl: data.linkUrl,
+      linkText: data.linkText,
+      active: data.active ?? true,
+      type: data.type,
+      priority: data.priority,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

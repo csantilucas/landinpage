@@ -1,10 +1,57 @@
+'use client';
+
 import React from 'react';
 import { MapPin, Phone, MessageSquare, ExternalLink } from 'lucide-react';
-import { OPERATIONAL_BASES } from '@/data/companyData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSiteContent, OperationalBase } from '@/lib/api';
 import CompanyMap from '@/components/CompanyMap';
 import ScrollReveal from '@/components/ScrollReveal';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FALLBACK_BASES } from '@/data/fallbackData';
 
 export default function BasesGrid() {
+  const { data: siteContent, isLoading } = useQuery({
+    queryKey: ['siteContent'],
+    queryFn: () => fetchSiteContent(),
+    staleTime: 1000 * 60 * 5,
+  });
+
+  if (isLoading) {
+    return (
+      <section id="bases" className="py-20 bg-white border-t border-slate-200 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3 flex flex-col items-center">
+            <Skeleton className="h-6 w-28 rounded-full" />
+            <Skeleton className="h-9 w-72 rounded-xl" />
+            <Skeleton className="h-5 w-full max-w-lg rounded-lg" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="rounded-2xl p-6 border border-slate-200 space-y-4">
+                <Skeleton className="h-6 w-32 rounded-md" />
+                <Skeleton className="h-7 w-4/5 rounded-lg" />
+                <Skeleton className="h-4 w-full rounded-md" />
+                <Skeleton className="h-4 w-2/3 rounded-md" />
+                <div className="pt-4 border-t border-slate-100 space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-36" />
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-14">
+            <Skeleton className="w-full h-96 rounded-3xl" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  const operationalBases: OperationalBase[] =
+    siteContent?.company_bases && siteContent.company_bases.length > 0
+      ? siteContent.company_bases
+      : FALLBACK_BASES;
+
   return (
     <section id="bases" className="py-20 bg-white border-t border-slate-200 overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +71,7 @@ export default function BasesGrid() {
         </ScrollReveal>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {OPERATIONAL_BASES.map((base, idx) => {
+          {operationalBases.map((base, idx) => {
             const isMatriz = base.id === 'vilhena';
             return (
               <ScrollReveal key={base.id} direction="up" delay={idx * 100} distance={30}>
@@ -71,7 +118,7 @@ export default function BasesGrid() {
                         Telefones:
                       </span>
                       <div className="flex flex-col gap-1">
-                        {base.phones.map((phone, pIdx) => (
+                        {base.phones?.map((phone, pIdx) => (
                           <a
                             key={pIdx}
                             href={`tel:${phone.replace(/\D/g, '')}`}

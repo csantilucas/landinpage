@@ -2,16 +2,46 @@
 
 import React, { useState } from 'react';
 import { MapPin, Navigation, ExternalLink, Phone, MessageSquare, Check, Copy } from 'lucide-react';
-import { OPERATIONAL_BASES, COMPANY_INFO } from '@/data/companyData';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSiteContent, OperationalBase, CompanyInfo } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FALLBACK_BASES, FALLBACK_COMPANY_INFO } from '@/data/fallbackData';
 
 export default function CompanyMap() {
+  const { data: siteContent, isLoading } = useQuery({
+    queryKey: ['siteContent'],
+    queryFn: () => fetchSiteContent(),
+    staleTime: 1000 * 60 * 5,
+  });
+
   const [selectedBaseId, setSelectedBaseId] = useState<string>('vilhena');
   const [copiedCoords, setCopiedCoords] = useState(false);
 
-  const currentBase = OPERATIONAL_BASES.find((b) => b.id === selectedBaseId) || OPERATIONAL_BASES[0];
+  if (isLoading) {
+    return (
+      <div className="mt-14 bg-white rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-200 space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-6 w-36 rounded-md" />
+          <Skeleton className="h-8 w-64 rounded-lg" />
+        </div>
+        <Skeleton className="w-full h-96 rounded-2xl" />
+      </div>
+    );
+  }
+
+  const operationalBases: OperationalBase[] =
+    siteContent?.company_bases && siteContent.company_bases.length > 0
+      ? siteContent.company_bases
+      : FALLBACK_BASES;
+
+  const companyInfo: Partial<CompanyInfo> =
+    siteContent?.company_info || FALLBACK_COMPANY_INFO;
+
+  const currentBase =
+    operationalBases.find((b) => b.id === selectedBaseId) || operationalBases[0];
 
   const handleCopyCoords = () => {
-    if (currentBase.coordinates) {
+    if (currentBase?.coordinates) {
       const coordsText = `${currentBase.coordinates.lat}, ${currentBase.coordinates.lng}`;
       navigator.clipboard.writeText(coordsText);
       setCopiedCoords(true);
@@ -42,7 +72,7 @@ export default function CompanyMap() {
 
         {/* Base Selector Tabs */}
         <div className="flex flex-wrap gap-2">
-          {OPERATIONAL_BASES.map((b) => {
+          {operationalBases.map((b) => {
             const isSelected = b.id === selectedBaseId;
             return (
               <button
@@ -130,7 +160,7 @@ export default function CompanyMap() {
                 Atendimento Telefônico:
               </span>
               <div className="flex flex-wrap gap-2">
-                {currentBase.phones.map((phone, idx) => (
+                {currentBase.phones?.map((phone, idx) => (
                   <a
                     key={idx}
                     href={`tel:${phone.replace(/\D/g, '')}`}
@@ -148,8 +178,8 @@ export default function CompanyMap() {
           <div className="space-y-2.5 pt-4 border-t border-slate-200">
             <a
               href={
-                currentBase.id === 'vilhena'
-                  ? COMPANY_INFO.googleMapsRouteUrl
+                currentBase.id === 'vilhena' && companyInfo.googleMapsRouteUrl
+                  ? companyInfo.googleMapsRouteUrl
                   : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(currentBase.address)}`
               }
               target="_blank"

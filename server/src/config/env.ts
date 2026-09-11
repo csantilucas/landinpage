@@ -10,6 +10,8 @@ export const ENV = {
   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || 'http://localhost:5000',
   ADMIN_EMAIL: process.env.ADMIN_EMAIL || 'admin@trrkrupinski.com.br',
   ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || 'admin123456',
+  COMMODITIES_API_KEY: process.env.COMMODITIES_API_KEY || '',
+  COMMODITIES_CACHE_TTL_MINUTES: process.env.COMMODITIES_CACHE_TTL_MINUTES ? parseInt(process.env.COMMODITIES_CACHE_TTL_MINUTES, 10) : 60,
 };
 
 if (ENV.NODE_ENV === 'production') {

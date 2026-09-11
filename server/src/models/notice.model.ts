@@ -1,20 +1,31 @@
 import { ObjectId } from 'mongodb';
 
-export type NoticeType = 'info' | 'warning' | 'alert' | 'success';
-
 export interface Notice {
   _id?: ObjectId;
   title: string;
-  message: string;
-  type: NoticeType;
-  active: boolean;
-  priority: number;
+  description: string;
+  message?: string; // Mantido para compatibilidade
   imageUrl?: string;
   linkUrl?: string;
   linkText?: string;
+  active: boolean;
+  type?: string;
+  priority?: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type CreateNoticeDTO = Omit<Notice, '_id' | 'createdAt' | 'updatedAt'>;
+export type CreateNoticeDTO = {
+  title: string;
+  description?: string;
+  message?: string;
+  imageUrl?: string;
+  linkUrl?: string;
+  linkText?: string;
+  active?: boolean;
+  type?: string;
+  priority?: number;
+};
+
 export type UpdateNoticeDTO = Partial<CreateNoticeDTO>;
+

@@ -5,7 +5,9 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Truck, ShieldCheck, Sparkles } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import ScrollReveal from '@/components/ScrollReveal';
-import { fetchActiveFleet } from '@/lib/api';
+import { fetchActiveFleet, formatImageUrl } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
+import { FALLBACK_FLEET_ITEMS } from '@/data/fallbackData';
 
 export interface FleetItem {
   id: number;
@@ -14,99 +16,6 @@ export interface FleetItem {
   subtitle: string;
 }
 
-const DEFAULT_FLEET_ITEMS: FleetItem[] = [
-  {
-    id: 1,
-    src: '/images/frota1.jpeg',
-    title: 'Frota Pesada & Unidades Tanque Alinhadas',
-    subtitle: 'Caminhões Volvo e Scania com tanques certificados para abastecimento contínuo',
-  },
-  {
-    id: 2,
-    src: '/images/frota2.jpeg',
-    title: 'Cavalo Mecânico Volvo Globetrotter',
-    subtitle: 'Bitrem tanque de grande capacidade para transporte de produtos perigosos rodoviários',
-  },
-  {
-    id: 3,
-    src: '/images/frota3.jpeg',
-    title: 'Conjunto Randon de Alta Performance',
-    subtitle: 'Tanques térmicos e isotérmicos para conservação e controle rigoroso de densidade',
-  },
-  {
-    id: 4,
-    src: '/images/frota4.jpeg',
-    title: 'Operação Noturna & Plantão na Safra',
-    subtitle: 'Prontidão 24 horas para atender colheitadeiras e frotas sem paralisação',
-  },
-  {
-    id: 5,
-    src: '/images/frota5.jpeg',
-    title: 'Acesso Direto à Lavoura e Terrenos Rurais',
-    subtitle: 'Caminhões com tração e suspensão reforçada para estradas vicinais de terra',
-  },
-  {
-    id: 6,
-    src: '/images/frota6.jpeg',
-    title: 'Pátio Logístico Integrado',
-    subtitle: 'Manutenção rigorosa e higienização periódica de tanques para pureza do diesel',
-  },
-  {
-    id: 7,
-    src: '/images/frota7.jpeg',
-    title: 'Telemetria e Rastreamento Via Satélite',
-    subtitle: 'Monitoramento contínuo de rota, velocidade e tempo de deslocamento',
-  },
-  {
-    id: 8,
-    src: '/images/frota8.jpeg',
-    title: 'Logística Especializada para o Agronegócio',
-    subtitle: 'Atendimento pontual aos maiores polos produtores de grãos de RO e MT',
-  },
-  {
-    id: 9,
-    src: '/images/frota9.jpeg',
-    title: 'Caminhões de Entrega Fracionada',
-    subtitle: 'Agilidade para levar combustível diretamente aos tanques aéreos das propriedades',
-  },
-  {
-    id: 10,
-    src: '/images/frota10.jpeg',
-    title: 'Bombas Medidoras Digitais Calibradas',
-    subtitle: 'Medição precisa aferida pelos órgãos reguladores e laudo de entrega',
-  },
-  {
-    id: 11,
-    src: '/images/frota11.jpeg',
-    title: 'Segurança Operacional e Equipe Treinada',
-    subtitle: 'Motoristas capacitados com certificação MOPP e kit de emergência ambiental',
-  },
-  {
-    id: 12,
-    src: '/images/frota12.jpeg',
-    title: 'Veículos Euro 5 e Euro 6 Modernos',
-    subtitle: 'Baixa emissão de poluentes e máxima eficiência energética na rodovia',
-  },
-  {
-    id: 13,
-    src: '/images/frota13.jpeg',
-    title: 'Estrutura para Grandes Demandas Industriais',
-    subtitle: 'Transporte de grandes volumes com pontualidade para usinas, garagens e mineradoras',
-  },
-  {
-    id: 14,
-    src: '/images/frota14.jpeg',
-    title: 'Infraestrutura de Apoio Rodoviário',
-    subtitle: 'Suporte rápido ao longo dos eixos da BR-364 e BR-174',
-  },
-  {
-    id: 15,
-    src: '/images/frota15.jpeg',
-    title: 'Tradição e Presença em Rondônia e Mato Grosso',
-    subtitle: 'Mais de 30 anos cruzando as estradas com segurança e compromisso com o cliente',
-  },
-];
-
 export default function FleetCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [slideDirection, setSlideDirection] = useState<'right' | 'left'>('right');
@@ -114,7 +23,7 @@ export default function FleetCarousel() {
   const touchStartX = useRef<number | null>(null);
 
   // TanStack Query para carregar a frota com cache otimizado
-  const { data: fleetData } = useQuery({
+  const { data: fleetData, isLoading } = useQuery({
     queryKey: ['activeFleet'],
     queryFn: fetchActiveFleet,
     staleTime: 1000 * 60 * 5,
@@ -128,13 +37,14 @@ export default function FleetCarousel() {
       if (carouselItems.length > 0) {
         return carouselItems.map((d, i) => ({
           id: i + 1,
-          src: d.imageUrl,
+          src: formatImageUrl(d.imageUrl),
           title: d.title,
           subtitle: d.description || 'Abastecimento com qualidade e segurança TRR Krupinski',
         }));
       }
     }
-    return DEFAULT_FLEET_ITEMS;
+    // Fallback estrito quando a query não retorna dados
+    return FALLBACK_FLEET_ITEMS;
   }, [fleetData]);
 
   const total = items.length || 1;
@@ -149,33 +59,22 @@ export default function FleetCarousel() {
     setCurrentIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  const goToSlide = (index: number) => {
-    const target = (index + total) % total;
-    if (target === currentIndex) return;
-    setSlideDirection(target > currentIndex ? 'right' : 'left');
-    setCurrentIndex(target);
-  };
+  const goToSlide = useCallback(
+    (index: number) => {
+      setSlideDirection(index > currentIndex ? 'right' : 'left');
+      setCurrentIndex(index);
+    },
+    [currentIndex]
+  );
 
-  // Keyboard navigation
+  // Autoplay a cada 5.5 segundos
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') nextSlide();
-      if (e.key === 'ArrowLeft') prevSlide();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [nextSlide, prevSlide]);
+    if (isPaused || total <= 1) return;
+    const interval = setInterval(nextSlide, 5500);
+    return () => clearInterval(interval);
+  }, [isPaused, nextSlide, total]);
 
-  // Auto rotation
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(timer);
-  }, [isPaused, nextSlide]);
-
-  // Touch gesture support
+  // Touch Swipe para dispositivos móveis
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
@@ -184,17 +83,47 @@ export default function FleetCarousel() {
     if (touchStartX.current === null) return;
     const touchEndX = e.changedTouches[0].clientX;
     const diff = touchStartX.current - touchEndX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) nextSlide();
-      else prevSlide();
+    if (Math.abs(diff) > 45) {
+      if (diff > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
     }
     touchStartX.current = null;
   };
 
-  // Helper to safely get item by relative offset
+  if (isLoading) {
+    return (
+      <section id="frota" className="py-20 bg-slate-900 text-white overflow-hidden relative">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div className="space-y-3">
+              <Skeleton className="h-6 w-32 rounded-full bg-slate-800" />
+              <Skeleton className="h-10 w-80 rounded-xl bg-slate-800" />
+              <Skeleton className="h-5 w-96 rounded-lg bg-slate-800" />
+            </div>
+            <div className="flex gap-2">
+              <Skeleton className="h-10 w-10 rounded-xl bg-slate-800" />
+              <Skeleton className="h-10 w-10 rounded-xl bg-slate-800" />
+            </div>
+          </div>
+          <div className="relative aspect-[16/9] md:aspect-[21/9] max-w-4xl mx-auto">
+            <Skeleton className="w-full h-full rounded-2xl bg-slate-800" />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  // Função auxiliar para obter item em offset circular relativo ao centro
   const getItemAtOffset = (offset: number) => {
     const idx = (currentIndex + offset + total) % total;
-    return { item: items[idx] || items[0], index: idx };
+    return { item: items[idx], index: idx };
   };
 
   const farLeft = getItemAtOffset(-2);
@@ -227,7 +156,7 @@ export default function FleetCarousel() {
           </div>
         </ScrollReveal>
 
-        {/* Carousel Showcase in the exact pill-capsule style of the reference photo */}
+        {/* Carousel Showcase */}
         <ScrollReveal direction="up" distance={30} delay={150}>
           <div
             className="relative flex items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 select-none"
@@ -248,6 +177,7 @@ export default function FleetCarousel() {
                 src={farLeft.item.src}
                 alt={farLeft.item.title}
                 fill
+                unoptimized
                 sizes="100px"
                 className="object-cover transition-all duration-700 group-hover:scale-110"
               />
@@ -265,6 +195,7 @@ export default function FleetCarousel() {
                 src={nearLeft.item.src}
                 alt={nearLeft.item.title}
                 fill
+                unoptimized
                 sizes="160px"
                 className="object-cover transition-all duration-700 group-hover:scale-110"
               />
@@ -298,6 +229,7 @@ export default function FleetCarousel() {
                   alt={center.item.title}
                   fill
                   priority
+                  unoptimized
                   sizes="(max-width: 768px) 100vw, 720px"
                   className="object-cover"
                 />
@@ -356,6 +288,7 @@ export default function FleetCarousel() {
                 src={nearRight.item.src}
                 alt={nearRight.item.title}
                 fill
+                unoptimized
                 sizes="160px"
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
@@ -373,6 +306,7 @@ export default function FleetCarousel() {
                 src={farRight.item.src}
                 alt={farRight.item.title}
                 fill
+                unoptimized
                 sizes="100px"
                 className="object-cover transition-transform duration-700 group-hover:scale-110"
               />
