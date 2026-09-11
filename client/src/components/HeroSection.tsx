@@ -119,21 +119,7 @@ export default function HeroSection({
             <ScrollReveal direction="up" distance={20} duration={600}>
               <div className="flex flex-wrap items-center gap-3">
                 {/* Brand Logo */}
-                <div className="bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-xs flex items-center gap-2">
-                  <Image
-                    src="/logo.png"
-                    alt="Logo TRR Krupinski"
-                    width={90}
-                    height={32}
-                    className="h-7 w-auto object-contain"
-                    priority
-                  />
-                  <div className="h-4 w-px bg-slate-200" />
-                  <span className="text-[11px] font-black text-slate-800 tracking-wider">
-                    TRR KRUPINSKI
-                  </span>
-                </div>
-
+                
                 {/* Badge de Tradição */}
                 {isEditable ? (
                   <div className="relative group max-w-md flex-1">
