@@ -29,7 +29,7 @@ export default function NoticeBanner() {
     }
   }, []);
 
-  const { data: notices = [DEFAULT_FALLBACK_NOTICE], isLoading } = useQuery({
+  const { data: notices, isLoading } = useQuery({
     queryKey: ['activeNotices'],
     queryFn: async () => {
       const data = await fetchActiveNotices();
@@ -43,7 +43,7 @@ export default function NoticeBanner() {
     sessionStorage.setItem('trr_notice_dismissed', 'true');
   };
 
-  if (dismissed || isLoading || notices.length === 0) {
+  if (dismissed || isLoading || !notices || notices.length === 0) {
     return null;
   }
 

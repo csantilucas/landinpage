@@ -1,98 +1,41 @@
-import express from 'express';
-import cors from 'cors';
-import { ENV, getAllowedOrigins } from './config/env.js';
+import { app } from './app.js';
+import { ENV } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
-import { initAuth, getAuth } from './auth/better-auth.js';
-import { toNodeHandler } from 'better-auth/node';
-import { loginRateLimiter } from './middlewares/rate-limit.middleware.js';
-import { createMainRouter } from './routes/index.js';
+import { initAuth } from './auth/better-auth.js';
 import { commodityService } from './services/commodity.service.js';
 
-let appInstance: express.Express | null = null;
-let initPromise: Promise<express.Express> | null = null;
+let isInitialized = false;
+let initPromise: Promise<typeof app> | null = null;
 
-export async function getApp(): Promise<express.Express> {
-  if (appInstance) return appInstance;
+export async function getApp() {
+  if (isInitialized) return app;
   if (initPromise) return initPromise;
 
   initPromise = (async () => {
-    try {
-      if (!ENV.MONGODB_URI) {
-        throw new Error('A variável de ambiente MONGODB_URI não foi definida nas configurações da Vercel.');
-      }
-
-      console.log('[Server] Inicializando conexão com o MongoDB...');
-      const db = await connectDB();
-
-      console.log('[Server] Inicializando Better Auth com adaptador MongoDB...');
-      initAuth(db);
-
-      const app = express();
-
-      // CORS configurado para os IPs e origens definidos na variável de ambiente
-      const allowedOrigins = getAllowedOrigins();
-
-      const corsMiddleware = cors({
-        origin: (origin, callback) => {
-          if (!origin) return callback(null, true);
-
-          const matches = allowedOrigins.some((allowed) => {
-            if (origin === allowed) return true;
-            if (!allowed.startsWith('http://') && !allowed.startsWith('https://')) {
-              return origin.includes(allowed);
-            }
-            return false;
-          });
-
-          if (matches) {
-            return callback(null, origin);
-          }
-
-          callback(null, origin);
-        },
-        credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-      });
-
-      app.use(corsMiddleware);
-      app.options('*', corsMiddleware);
-
-      // Rate limiter nas rotas de login do Better Auth
-      app.post(['/api/auth/sign-in', '/api/auth/sign-in/*'], loginRateLimiter);
-
-      // Handler do Better Auth montado ANTES de express.json()
-      // Isso é fundamental para evitar a condição de corrida no stream da requisição (body stream)
-      app.all(['/api/auth', '/api/auth/*'], toNodeHandler(getAuth()));
-
-      // Parse JSON e urlencoded APENAS após o Better Auth
-      app.use(express.json());
-      app.use(express.urlencoded({ extended: true }));
-
-      // Montagem das rotas da API
-      app.use('/api', createMainRouter());
-
-      // Middleware de erro 404
-      app.use((_req, res) => {
-        res.status(404).json({ success: false, error: 'Rota não encontrada' });
-      });
-
-      appInstance = app;
-      return app;
-    } catch (err) {
-      initPromise = null;
-      throw err;
+    if (!ENV.DATABASE_URL && !ENV.MONGODB_URI) {
+      throw new Error('A variável de ambiente DATABASE_URL não foi definida.');
     }
+
+    console.log('[Server] Inicializando conexão com o SQL Server (Prisma ORM)...');
+    await connectDB();
+
+    console.log('[Server] Inicializando Better Auth com adaptador SQL Server (Prisma)...');
+    initAuth();
+
+    isInitialized = true;
+    return app;
   })();
 
   return initPromise;
 }
 
+export { app };
+
 // Handler padrão para serverless (Vercel)
 export default async function handler(req: any, res: any) {
   try {
-    const app = await getApp();
-    return app(req, res);
+    const initializedApp = await getApp();
+    return initializedApp(req, res);
   } catch (error: any) {
     console.error('[Serverless Fatal Error]:', error);
     if (!res.headersSent) {
@@ -105,9 +48,9 @@ export default async function handler(req: any, res: any) {
           success: false,
           error: 'Falha na inicialização do backend',
           message: error?.message || String(error),
-          hint: !ENV.MONGODB_URI
-            ? 'Adicione MONGODB_URI nas Environment Variables da Vercel.'
-            : 'Verifique se o MongoDB Atlas permite conexões de qualquer IP (Network Access: 0.0.0.0/0).',
+          hint: !ENV.DATABASE_URL
+            ? 'Adicione DATABASE_URL nas variáveis de ambiente com a string do SQL Server.'
+            : 'Verifique se o SQL Server está acessível e aceitando conexões na porta configurada.',
         })
       );
     }
@@ -116,7 +59,7 @@ export default async function handler(req: any, res: any) {
 
 async function bootstrap() {
   try {
-    const app = await getApp();
+    await getApp();
 
     // Inicia agendador horário de commodities apenas em servidor contínuo
     commodityService.startScheduledSync();
@@ -147,7 +90,7 @@ async function bootstrap() {
   }
 }
 
-// Só inicia o servidor com listen se NÃO estiver rodando como serverless na Vercel
-if (!process.env.VERCEL) {
+// Só inicia o servidor com listen se NÃO estiver rodando como serverless ou teste
+if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   bootstrap();
 }

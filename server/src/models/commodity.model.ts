@@ -24,7 +24,8 @@ export interface CommoditiesData {
 }
 
 export interface CommoditiesCacheDocument {
-  _id?: any;
+  id?: string;
+  _id?: string;
   key: string;
   items: CommodityItem[];
   usdToBrl: number;

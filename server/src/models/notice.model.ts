@@ -1,7 +1,6 @@
-import { ObjectId } from 'mongodb';
-
 export interface Notice {
-  _id?: ObjectId;
+  id?: string;
+  _id?: string;
   title: string;
   description: string;
   message?: string; // Mantido para compatibilidade
@@ -28,4 +27,3 @@ export type CreateNoticeDTO = {
 };
 
 export type UpdateNoticeDTO = Partial<CreateNoticeDTO>;
-

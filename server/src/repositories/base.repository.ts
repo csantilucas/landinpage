@@ -1,33 +1,107 @@
-import { Collection, ObjectId } from 'mongodb';
-import { getDB } from '../config/db.js';
+import { prisma } from '../config/prisma.js';
 import { OperationalBaseItem } from '../models/base.model.js';
 
-export class BaseRepository {
-  private get collection(): Collection<OperationalBaseItem> {
-    return getDB().collection<OperationalBaseItem>('operational_bases');
+function safeParseJSON<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
+  }
+}
+
+function mapFromPrisma(record: any): OperationalBaseItem {
+  return {
+    ...record,
+    _id: record.id,
+    id: record.id,
+    phones: Array.isArray(record.phones) ? record.phones : safeParseJSON(record.phones, []),
+    highlights: Array.isArray(record.highlights) ? record.highlights : safeParseJSON(record.highlights, []),
+    coordinates:
+      typeof record.coordinates === 'object' && record.coordinates !== null
+        ? record.coordinates
+        : safeParseJSON(record.coordinates, undefined),
+  };
+}
+
+function mapToPrisma(data: any) {
+  const { _id, id, createdAt, updatedAt, ...rest } = data;
+  const result: any = { ...rest };
+
+  if (id !== undefined) result.id = id;
+  if (rest.phones !== undefined) {
+    result.phones = typeof rest.phones === 'string' ? rest.phones : JSON.stringify(rest.phones || []);
+  }
+  if (rest.highlights !== undefined) {
+    result.highlights =
+      typeof rest.highlights === 'string'
+        ? rest.highlights
+        : rest.highlights
+        ? JSON.stringify(rest.highlights)
+        : null;
+  }
+  if (rest.coordinates !== undefined) {
+    result.coordinates =
+      typeof rest.coordinates === 'string'
+        ? rest.coordinates
+        : rest.coordinates
+        ? JSON.stringify(rest.coordinates)
+        : null;
   }
 
+  return result;
+}
+
+export class BaseRepository {
   async findAll(): Promise<OperationalBaseItem[]> {
-    let items = await this.collection.find({}).sort({ order: 1, _id: 1 }).toArray();
-    
-    // Se a coleção estiver vazia, verifica se há dados antigos em site_contents
+    let items = await prisma.operationalBase.findMany({
+      orderBy: [{ order: 'asc' }, { id: 'asc' }],
+    });
+
+    // Se a tabela estiver vazia, verifica se há dados antigos em site_contents
     if (items.length === 0) {
-      const siteContents = getDB().collection('site_contents');
-      const legacyBasesDoc = await siteContents.findOne({ key: 'company_bases' });
-      if (legacyBasesDoc && Array.isArray(legacyBasesDoc.data) && legacyBasesDoc.data.length > 0) {
-        const seedItems: OperationalBaseItem[] = legacyBasesDoc.data.map((b: any, idx: number) => ({
-          ...b,
-          order: idx + 1,
-          active: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        }));
-        await this.collection.insertMany(seedItems as any);
-        items = await this.collection.find({}).sort({ order: 1, _id: 1 }).toArray();
+      const legacyBasesDoc = await prisma.siteContent.findUnique({
+        where: { key: 'company_bases' },
+      });
+
+      if (legacyBasesDoc?.data) {
+        const parsedData = safeParseJSON<any[]>(legacyBasesDoc.data, []);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          for (let idx = 0; idx < parsedData.length; idx++) {
+            const b = parsedData[idx];
+            const baseId = b.id || `base-${idx + 1}`;
+            await prisma.operationalBase.upsert({
+              where: { id: baseId },
+              create: {
+                id: baseId,
+                name: b.name || '',
+                city: b.city || '',
+                state: b.state || '',
+                type: b.type || '',
+                address: b.address || '',
+                phones: JSON.stringify(b.phones || []),
+                whatsappNumber: b.whatsappNumber || '',
+                whatsappDisplay: b.whatsappDisplay || '',
+                coverage: b.coverage || null,
+                highlights: b.highlights ? JSON.stringify(b.highlights) : null,
+                coordinates: b.coordinates ? JSON.stringify(b.coordinates) : null,
+                googleMapsUrl: b.googleMapsUrl || '',
+                embedUrl: b.embedUrl || '',
+                wazeUrl: b.wazeUrl || null,
+                order: idx + 1,
+                active: true,
+              },
+              update: {},
+            });
+          }
+          items = await prisma.operationalBase.findMany({
+            orderBy: [{ order: 'asc' }, { id: 'asc' }],
+          });
+        }
       }
     }
 
-    return items;
+    return items.map(mapFromPrisma);
   }
 
   async findActive(): Promise<OperationalBaseItem[]> {
@@ -36,51 +110,52 @@ export class BaseRepository {
   }
 
   async findByIdOrSlug(idOrSlug: string): Promise<OperationalBaseItem | null> {
-    if (ObjectId.isValid(idOrSlug)) {
-      const byObjId = await this.collection.findOne({ _id: new ObjectId(idOrSlug) });
-      if (byObjId) return byObjId;
+    try {
+      const item = await prisma.operationalBase.findUnique({
+        where: { id: idOrSlug },
+      });
+      return item ? mapFromPrisma(item) : null;
+    } catch {
+      return null;
     }
-    return this.collection.findOne({ id: idOrSlug });
   }
 
   async create(data: Omit<OperationalBaseItem, '_id' | 'createdAt' | 'updatedAt'>): Promise<OperationalBaseItem> {
-    const now = new Date();
-    const doc: OperationalBaseItem = {
+    const baseId = data.id || `base-${Date.now()}`;
+    const prismaData = mapToPrisma({
       ...data,
+      id: baseId,
       active: data.active ?? true,
       order: data.order ?? 0,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const result = await this.collection.insertOne(doc);
-    return { ...doc, _id: result.insertedId };
+    });
+
+    const item = await prisma.operationalBase.create({
+      data: prismaData,
+    });
+    return mapFromPrisma(item);
   }
 
   async update(idOrSlug: string, data: Partial<OperationalBaseItem>): Promise<OperationalBaseItem | null> {
-    const { _id, ...cleanData } = data;
-    const filter = ObjectId.isValid(idOrSlug)
-      ? { $or: [{ _id: new ObjectId(idOrSlug) }, { id: idOrSlug }] }
-      : { id: idOrSlug };
-
-    const result = await this.collection.findOneAndUpdate(
-      filter,
-      {
-        $set: {
-          ...cleanData,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: 'after' }
-    );
-    return result as OperationalBaseItem | null;
+    try {
+      const prismaData = mapToPrisma(data);
+      const item = await prisma.operationalBase.update({
+        where: { id: idOrSlug },
+        data: prismaData,
+      });
+      return mapFromPrisma(item);
+    } catch {
+      return null;
+    }
   }
 
   async delete(idOrSlug: string): Promise<boolean> {
-    const filter = ObjectId.isValid(idOrSlug)
-      ? { $or: [{ _id: new ObjectId(idOrSlug) }, { id: idOrSlug }] }
-      : { id: idOrSlug };
-
-    const result = await this.collection.deleteOne(filter);
-    return result.deletedCount > 0;
+    try {
+      await prisma.operationalBase.delete({
+        where: { id: idOrSlug },
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

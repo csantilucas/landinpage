@@ -88,7 +88,7 @@ export default function AdminBannersPage() {
     setFormData({
       title: '',
       description: '',
-      imageUrl: '/images/Gemini_Generated_Image_ywuiheywuiheywui.jpg',
+      imageUrl: '/images/banner1.jpg',
       order: banners.length + 1,
       active: true,
       linkUrl: '',
@@ -181,7 +181,7 @@ export default function AdminBannersPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {banners.map((banner) => {
-            const formattedImg = formatImageUrl(banner.imageUrl, '/images/Gemini_Generated_Image_ywuiheywuiheywui.jpg');
+            const formattedImg = formatImageUrl(banner.imageUrl, '/images/banner1.jpg');
             return (
               <div
                 key={banner._id}
@@ -340,11 +340,11 @@ export default function AdminBannersPage() {
                   required
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                  placeholder="Ex: /images/Gemini_Generated_Image_ywuiheywuiheywui.jpg ou link do Drive"
+                  placeholder="Ex: /images/banner1.jpg ou link do Drive"
                   className="w-full text-xs font-mono px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-amber-500"
                 />
                 <p className="text-[11px] text-slate-400 mt-1">
-                  Você pode usar fotos locais da pasta public (ex: <code>/images/Gemini_Generated_Image_ywuiheywuiheywui.jpg</code>, <code>/images/agro-harvest.jpg</code>) ou link do Google Drive.
+                  Você pode usar fotos locais da pasta public (ex: <code>/images/banner1.jpg</code>, <code>/images/banner2.jpg</code>, <code>/images/agro-harvest.jpg</code>) ou link do Google Drive.
                 </p>
               </div>
 

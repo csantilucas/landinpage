@@ -40,7 +40,15 @@ export class BaseService {
       throw new Error('O estado da base é obrigatório');
     }
 
-    const slug = (data.id || data.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')).trim();
+    let slug = (data.id || data.city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-')).trim();
+
+    const existing = await this.baseRepo.findByIdOrSlug(slug);
+    if (existing) {
+      if (data.id) {
+        throw new Error(`Já existe uma base operacional cadastrada com o identificador "${slug}".`);
+      }
+      slug = `${slug}-${Date.now()}`;
+    }
 
     const created = await this.baseRepo.create({
       id: slug,

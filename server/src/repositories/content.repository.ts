@@ -1,33 +1,56 @@
-import { Collection } from 'mongodb';
-import { getDB } from '../config/db.js';
+import { prisma } from '../config/prisma.js';
 import { SiteContent } from '../models/content.model.js';
 
-export class ContentRepository {
-  private get collection(): Collection<SiteContent> {
-    return getDB().collection<SiteContent>('site_contents');
+function safeParseJSON<T>(value: string | null | undefined, fallback: T): T {
+  if (!value) return fallback;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return fallback;
   }
+}
 
+function mapToSiteContent(record: any): SiteContent {
+  return {
+    id: record.id,
+    _id: record.id,
+    key: record.key,
+    data: typeof record.data === 'string' ? safeParseJSON(record.data, {}) : record.data,
+    updatedAt: record.updatedAt,
+  };
+}
+
+export class ContentRepository {
   async findAll(): Promise<SiteContent[]> {
-    return this.collection.find({}).toArray();
+    const records = await prisma.siteContent.findMany();
+    return records.map(mapToSiteContent);
   }
 
   async findByKey(key: string): Promise<SiteContent | null> {
-    return this.collection.findOne({ key });
+    try {
+      const record = await prisma.siteContent.findUnique({
+        where: { key },
+      });
+      return record ? mapToSiteContent(record) : null;
+    } catch {
+      return null;
+    }
   }
 
   async upsert(key: string, data: Record<string, any>): Promise<SiteContent> {
-    const result = await this.collection.findOneAndUpdate(
-      { key },
-      {
-        $set: {
-          key,
-          data,
-          updatedAt: new Date(),
-        },
+    const serialized = typeof data === 'string' ? data : JSON.stringify(data);
+    const record = await prisma.siteContent.upsert({
+      where: { key },
+      update: {
+        data: serialized,
+        updatedAt: new Date(),
       },
-      { upsert: true, returnDocument: 'after' }
-    );
+      create: {
+        key,
+        data: serialized,
+      },
+    });
 
-    return result as SiteContent;
+    return mapToSiteContent(record);
   }
 }

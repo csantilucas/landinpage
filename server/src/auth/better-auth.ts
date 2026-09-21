@@ -1,15 +1,17 @@
 import { betterAuth } from 'better-auth';
-import { mongodbAdapter } from 'better-auth/adapters/mongodb';
-import { Db } from 'mongodb';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { prisma } from '../config/prisma.js';
 import { ENV, getAllowedOrigins } from '../config/env.js';
 
 let authInstance: any = null;
 
-export function initAuth(db: Db) {
+export function initAuth(client = prisma) {
   if (authInstance) return authInstance;
 
   authInstance = betterAuth({
-    database: mongodbAdapter(db),
+    database: prismaAdapter(client, {
+      provider: 'sqlserver',
+    }),
     secret: ENV.BETTER_AUTH_SECRET,
     baseURL: ENV.BETTER_AUTH_URL,
     emailAndPassword: {
@@ -53,7 +55,8 @@ export function initAuth(db: Db) {
 
 export function getAuth() {
   if (!authInstance) {
-    throw new Error('Better Auth ainda não foi inicializado. Execute initAuth(db) primeiro.');
+    // Inicializa automaticamente se ainda não foi inicializado
+    return initAuth();
   }
   return authInstance;
 }

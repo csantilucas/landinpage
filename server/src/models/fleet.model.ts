@@ -1,7 +1,6 @@
-import { ObjectId } from 'mongodb';
-
 export interface FleetItem {
-  _id?: ObjectId;
+  id?: string;
+  _id?: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -12,5 +11,5 @@ export interface FleetItem {
   updatedAt: Date;
 }
 
-export type CreateFleetItemDTO = Omit<FleetItem, '_id' | 'createdAt' | 'updatedAt'>;
+export type CreateFleetItemDTO = Omit<FleetItem, 'id' | '_id' | 'createdAt' | 'updatedAt'>;
 export type UpdateFleetItemDTO = Partial<CreateFleetItemDTO>;

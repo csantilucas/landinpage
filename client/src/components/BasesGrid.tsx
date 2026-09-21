@@ -22,7 +22,7 @@ export default function BasesGrid() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const isLoading = isBasesLoading && isContentLoading;
+  const isLoading = isBasesLoading || isContentLoading;
 
   if (isLoading) {
     return (
