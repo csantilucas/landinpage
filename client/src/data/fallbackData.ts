@@ -34,7 +34,7 @@ export const FALLBACK_HERO = {
   badge: '30+ Anos de Tradição e Excelência',
   headline: 'Combustível no Seu Tanque, Onde Sua Operação Estiver',
   subheadline: 'Mais de 30 anos abastecendo a safra e as frotas de Rondônia e Mato Grosso com qualidade certificada ANP e pontualidade máxima.',
-  imageUrl: '/images/hero-truck.jpg',
+  imageUrl: '/images/frota1.jpeg',
 };
 
 export const FALLBACK_ABOUT = {
@@ -181,6 +181,39 @@ export const FALLBACK_CONTACT = {
   hours: 'Segunda a Sexta: 07h às 18h | Sábado: 07h às 12h (Plantão na Safra)',
 };
 
+export const FALLBACK_BANNERS = [
+  {
+    _id: 'default-banner-1',
+    title: 'TRR KRUPINSKI',
+    description: 'Entregando qualidade há mais de 30 anos',
+    imageUrl: '/images/banner1.jpg',
+    order: 1,
+    active: true,
+    linkUrl: '#sobre',
+    linkText: 'Conheça Nossa História',
+  },
+  {
+    _id: 'default-banner-2',
+    title: 'Plantão Safra 2026',
+    description: 'Abastecimento direto na lavoura com diesel certificado e pontualidade máxima',
+    imageUrl: '/images/agro-harvest.jpg',
+    order: 2,
+    active: true,
+    linkUrl: 'https://wa.me/5569999952942',
+    linkText: 'Fale com o Plantão',
+  },
+  {
+    _id: 'default-banner-3',
+    title: 'Frota Própria e Calibrada',
+    description: 'Transporte e entrega com máxima precisão e segurança para sua propriedade',
+    imageUrl: '/images/banner2.jpg',
+    order: 3,
+    active: true,
+    linkUrl: '#frota',
+    linkText: 'Ver Nossa Frota',
+  },
+];
+
 export const FALLBACK_NOTICES = [
   {
     _id: 'fallback-notice-1',
@@ -191,31 +224,115 @@ export const FALLBACK_NOTICES = [
     linkUrl: 'https://wa.me/5569999952942?text=Ol%C3%A1!%20Gostaria%20de%20solicitar%20abastecimento%20de%20safra.',
     linkText: 'Solicitar Abastecimento',
   },
+  {
+    _id: 'fallback-notice-2',
+    title: 'Entregas Programadas de Óleo Diesel S-10 e S-500',
+    description: 'Fornecimento contínuo de combustível com medição digital certificada pelo Inmetro e laudo de pureza a cada descarregamento na sua propriedade rural.',
+    imageUrl: '/images/banner2.jpg',
+    active: true,
+    linkUrl: '#produtos',
+    linkText: 'Conhecer Produtos',
+  },
+  {
+    _id: 'fallback-notice-3',
+    title: 'Frota Própria e Logística 24 Horas na Safra',
+    description: 'Caminhões tanques equipados com bombas abastecedoras digitais para levar óleo diesel até a frente de colheita sem paralisação das máquinas.',
+    imageUrl: '/images/banner1.jpg',
+    active: true,
+    linkUrl: '#frota',
+    linkText: 'Ver Frota',
+  },
 ];
 
 export const FALLBACK_FLEET_ITEMS = [
   {
     id: 1,
-    src: '/images/hero-truck.jpg',
+    src: '/images/frota1.jpeg',
     title: 'Caminhão Tanque com Medição Digital',
     subtitle: 'Equipado com carretel de alta vazão e bomba calibrada para abastecimento seguro.',
   },
   {
     id: 2,
-    src: '/images/agro-harvest.jpg',
-    title: 'Abastecimento Direto na Lavoura',
-    subtitle: 'Atendimento pontual sem interrupção do ritmo da colheita.',
+    src: '/images/frota2.jpeg',
+    title: 'Caminhão Toco para Estradas Vicinais',
+    subtitle: 'Agilidade de acesso e versatilidade em qualquer terreno ou propriedade rural.',
   },
   {
     id: 3,
-    src: '/images/frota1.jpeg',
+    src: '/images/frota3.jpeg',
     title: 'Frota Pesada Bitrem',
-    subtitle: 'Grande capacidade para suprimento contínuo de polos industriais e fazendas.',
+    subtitle: 'Grande capacidade para suprimento contínuo de polos agrícolas e industriais.',
   },
   {
     id: 4,
-    src: '/images/frota2.jpeg',
-    title: 'Caminhão Toco para Estradas Vicinais',
-    subtitle: 'Agilidade de acesso e versatilidade em qualquer terreno ou propriedade.',
+    src: '/images/frota4.jpeg',
+    title: 'Transporte Rodoviário Perigoso Certificado',
+    subtitle: 'Motoristas capacitados (MOPP) e conformidade integral com normas da ANTT e ANP.',
+  },
+  {
+    id: 5,
+    src: '/images/frota5.jpeg',
+    title: 'Abastecimento Direto na Frente de Colheita',
+    subtitle: 'Atendimento pontual sem interrupção do ritmo das colheitadeiras e tratores.',
+  },
+  {
+    id: 6,
+    src: '/images/frota6.jpeg',
+    title: 'Caminhão Tanque em Operação na Lavoura',
+    subtitle: 'Estrutura robusta para suportar estradas de terra e rotas remotas do Centro-Oeste e Norte.',
+  },
+  {
+    id: 7,
+    src: '/images/frota7.jpeg',
+    title: 'Entrega Programada de Diesel S-10 e S-500',
+    subtitle: 'Laudo de pureza e densidade a cada descarregamento na propriedade.',
+  },
+  {
+    id: 8,
+    src: '/images/frota8.jpeg',
+    title: 'Descarga Rápida com Bocal Hermético',
+    subtitle: 'Sistemas antivazamento e total segurança operacional para o meio ambiente.',
+  },
+  {
+    id: 9,
+    src: '/images/frota9.jpeg',
+    title: 'Logística Ágil para Safra e Entressafra',
+    subtitle: 'Distribuição contínua com autonomia garantida para grandes plantios.',
+  },
+  {
+    id: 10,
+    src: '/images/frota10.jpeg',
+    title: 'Monitoramento e Rastreamento 24h via Satélite',
+    subtitle: 'Segurança da carga em tempo real da base emissora até o ponto de consumo.',
+  },
+  {
+    id: 11,
+    src: '/images/frota11.jpeg',
+    title: 'Caminhão de Suporte para Frotas Agrícolas',
+    subtitle: 'Flexibilidade e capacidade de abastecer múltiplos veículos simultaneamente.',
+  },
+  {
+    id: 12,
+    src: '/images/frota12.jpeg',
+    title: 'Tanque Inox e Filtros Coalescentes',
+    subtitle: 'Garantia de combustível limpo, sem água emulsionada ou impurezas no motor.',
+  },
+  {
+    id: 13,
+    src: '/images/frota13.jpeg',
+    title: 'Atendimento Especializado a Fazendas e Mineradoras',
+    subtitle: 'Suprimento sob demanda para operações que não podem parar.',
+  },
+  {
+    id: 14,
+    src: '/images/frota14.jpeg',
+    title: 'Manutenção Preventiva Rigorosa',
+    subtitle: 'Veículos inspecionados periodicamente para garantir zero falhas em trânsito.',
+  },
+  {
+    id: 15,
+    src: '/images/frota15.jpeg',
+    title: 'Prontidão Operacional em Vilhena e Mato Grosso',
+    subtitle: 'Mais de 30 anos transportando energia e confiança pelo agronegócio brasileiro.',
   },
 ];

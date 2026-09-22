@@ -1,7 +1,6 @@
-import { ObjectId } from 'mongodb';
-
 export interface BannerItem {
-  _id?: ObjectId;
+  id?: string;
+  _id?: string;
   title: string;
   description: string;
   imageUrl: string;

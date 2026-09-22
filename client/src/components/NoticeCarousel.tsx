@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   ChevronLeft,
   ChevronRight,
@@ -23,10 +23,11 @@ export default function NoticeCarousel() {
     staleTime: 1000 * 60 * 2,
   });
 
-  const notices: Notice[] =
-    noticesData && noticesData.length > 0
-      ? noticesData
-      : (FALLBACK_NOTICES as Notice[]);
+  const notices: Notice[] = useMemo(() => {
+    if (isLoading) return [];
+    if (noticesData && noticesData.length > 0) return noticesData;
+    return FALLBACK_NOTICES as Notice[];
+  }, [noticesData, isLoading]);
 
   const total = notices.length || 1;
 
@@ -40,10 +41,10 @@ export default function NoticeCarousel() {
 
   // Autoplay a cada 7 segundos se houver mais de um aviso
   useEffect(() => {
-    if (isPaused || total <= 1) return;
+    if (isLoading || isPaused || total <= 1) return;
     const interval = setInterval(nextSlide, 7000);
     return () => clearInterval(interval);
-  }, [isPaused, nextSlide, total]);
+  }, [isLoading, isPaused, nextSlide, total]);
 
   if (isLoading) {
     return (

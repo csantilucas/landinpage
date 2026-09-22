@@ -1,27 +1,22 @@
-import { MongoClient, Db } from 'mongodb';
-import { ENV } from './env.js';
+import { prisma, ExtendedPrismaClient } from './prisma.js';
 
-let client: MongoClient | null = null;
-let db: Db | null = null;
-let connectPromise: Promise<Db> | null = null;
+let isConnected = false;
+let connectPromise: Promise<ExtendedPrismaClient> | null = null;
 
-export async function connectDB(): Promise<Db> {
-  if (db) return db;
+export async function connectDB(): Promise<ExtendedPrismaClient> {
+  if (isConnected) return prisma;
   if (connectPromise) return connectPromise;
 
   connectPromise = (async () => {
     try {
-      client = new MongoClient(ENV.MONGODB_URI!, {
-        serverSelectionTimeoutMS: 5000,
-        maxPoolSize: 10,
-      });
-      await client.connect();
-      db = client.db();
-      console.log(`[Database] Conectado ao MongoDB com sucesso: ${db.databaseName}`);
-      return db;
+      await prisma.$connect();
+      isConnected = true;
+      console.log('[Database] Conectado ao SQL Server com sucesso via Prisma ORM');
+      return prisma;
     } catch (error) {
       connectPromise = null;
-      console.error('[Database] Erro ao conectar ao MongoDB:', error);
+      isConnected = false;
+      console.error('[Database] Erro ao conectar ao SQL Server:', error);
       throw error;
     }
   })();
@@ -29,25 +24,23 @@ export async function connectDB(): Promise<Db> {
   return connectPromise;
 }
 
-export function getDB(): Db {
-  if (!db) {
-    throw new Error('Banco de dados ainda não foi conectado. Execute connectDB() primeiro.');
-  }
-  return db;
+export function getDB(): ExtendedPrismaClient {
+  return prisma;
 }
 
-export function getMongoClient(): MongoClient {
-  if (!client) {
-    throw new Error('MongoClient ainda não foi inicializado.');
-  }
-  return client;
+export function getPrisma(): ExtendedPrismaClient {
+  return prisma;
 }
 
 export async function closeDB(): Promise<void> {
-  if (client) {
-    await client.close();
-    client = null;
-    db = null;
-    console.log('[Database] Conexão com MongoDB encerrada.');
+  try {
+    await prisma.$disconnect();
+    isConnected = false;
+    connectPromise = null;
+    console.log('[Database] Conexão com SQL Server encerrada.');
+  } catch (error) {
+    console.error('[Database] Erro ao encerrar conexão com SQL Server:', error);
   }
 }
+
+export { prisma };

@@ -81,7 +81,7 @@ export class CommodityService {
 
   /**
    * Obtém as cotações de mercado.
-   * Utiliza cache em MongoDB com TTL de 1 hora para máxima performance e persistência em Serverless.
+   * Utiliza cache em banco de dados com TTL de 1 hora para máxima performance e persistência em Serverless.
    */
   async getCommodities(forceRefresh = false): Promise<CommoditiesData> {
     const ttlMinutes = ENV.COMMODITIES_CACHE_TTL_MINUTES || 60;
@@ -90,7 +90,7 @@ export class CommodityService {
 
     const cached = await this.repository.getLatest();
 
-    // Se o cache é válido e não é um refresh forçado, retorna o cache diretamente do MongoDB
+    // Se o cache é válido e não é um refresh forçado, retorna o cache diretamente do banco
     if (cached && !forceRefresh) {
       const ageMs = now.getTime() - new Date(cached.updatedAt).getTime();
       if (ageMs < ttlMs && cached.items && cached.items.length > 0) {
@@ -276,7 +276,7 @@ export class CommodityService {
 
       const nextUpdateAt = new Date(now.getTime() + ttlMs);
 
-      // Salva no MongoDB para compartilhar entre requisições
+      // Salva no banco de dados para compartilhar entre requisições
       await this.repository.saveLatest({
         items,
         usdToBrl: usdRate,

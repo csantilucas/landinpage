@@ -6,6 +6,7 @@ export const ENV = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   CLIENT_URL: process.env.CLIENT_URL,
   ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+  DATABASE_URL: process.env.DATABASE_URL || '',
   MONGODB_URI: process.env.MONGODB_URI,
   BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || '',
   BETTER_AUTH_URL: process.env.BETTER_AUTH_URL || '',
@@ -20,10 +21,24 @@ export function getAllowedOrigins(): string[] {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const defaults = ['http://localhost:3000', 'http://127.0.0.1:3000'];
-  for (const def of defaults) {
-    if (!envOrigins.includes(def)) {
-      envOrigins.push(def);
+  const productionDomains = [
+    'https://trrkrupinski.com.br',
+    'https://www.trrkrupinski.com.br',
+  ];
+
+  for (const domain of productionDomains) {
+    if (!envOrigins.includes(domain)) {
+      envOrigins.push(domain);
+    }
+  }
+
+  // Em desenvolvimento, permite origens locais
+  if (ENV.NODE_ENV !== 'production') {
+    const defaults = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+    for (const def of defaults) {
+      if (!envOrigins.includes(def)) {
+        envOrigins.push(def);
+      }
     }
   }
 

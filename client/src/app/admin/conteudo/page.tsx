@@ -36,7 +36,7 @@ export default function AdminConteudoPage() {
     headline: 'Combustível no Seu Tanque, Onde Sua Operação Estiver',
     subheadline:
       'Mais de 30 anos abastecendo a safra e as frotas de Rondônia e Mato Grosso com qualidade certificada ANP e pontualidade máxima.',
-    imageUrl: '/images/hero-truck.jpg',
+    imageUrl: '/images/frota1.jpeg',
   });
 
   // 2. Estado do Sobre (com suporte a imagem editável)

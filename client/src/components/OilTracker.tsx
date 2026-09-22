@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCommodities, CommodityItem, CommoditiesData } from '@/lib/api';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Gera os pontos de curva SVG dinâmicos a partir de um array numérico
@@ -87,31 +88,62 @@ export function CommoditiesTestTicker() {
           {/* Status e Câmbio de Referência */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-semibold shadow-2xs">
-              <span className={`w-2 h-2 rounded-full ${usdToBrl ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'} shrink-0`} />
+              <span className={`w-2 h-2 rounded-full ${isLoading ? 'bg-amber-400 animate-ping' : usdToBrl ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'} shrink-0`} />
               <span>
                 Dólar Comercial:{' '}
-                <strong>
-                  {usdToBrl
-                    ? `R$ ${usdToBrl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                    : 'Não é possível buscar a cotação no momento'}
-                </strong>
+                {isLoading ? (
+                  <Skeleton className="h-3.5 w-16 inline-block align-middle ml-1" />
+                ) : (
+                  <strong>
+                    {usdToBrl
+                      ? `R$ ${usdToBrl.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                      : 'Não é possível buscar a cotação no momento'}
+                  </strong>
+                )}
               </span>
             </div>
 
-            {lastUpdatedTime && (
+            {isLoading ? (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-500 text-xs shadow-2xs">
+                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <Skeleton className="h-3.5 w-20 inline-block align-middle ml-1" />
+              </div>
+            ) : lastUpdatedTime ? (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-500 text-xs shadow-2xs">
                 <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span>Última cotação: <strong>{lastUpdatedTime}</strong></span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* Conteúdo Dinâmico: Cards reais se a API estiver disponível, ou mensagem de Cotação Não Disponível */}
+        {/* Conteúdo Dinâmico: Cards reais se a API estiver disponível, Skeletons durante a consulta ou aviso de indisponibilidade */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center flex flex-col items-center justify-center gap-2 mb-5 shadow-2xs animate-pulse">
-            <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-xs text-slate-500 font-medium">Carregando cotações de mercado...</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs p-4 flex flex-col justify-between space-y-4"
+              >
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3.5 w-24 rounded-md" />
+                    <Skeleton className="h-2.5 w-32 rounded-md" />
+                  </div>
+                  <Skeleton className="h-5 w-14 rounded-md" />
+                </div>
+                <div className="my-1 space-y-2">
+                  <div className="flex items-baseline gap-2">
+                    <Skeleton className="h-4 w-6 rounded-md" />
+                    <Skeleton className="h-7 w-28 rounded-lg" />
+                  </div>
+                  <Skeleton className="h-3 w-20 rounded-md" />
+                </div>
+                <div className="w-full h-[55px] pt-1">
+                  <Skeleton className="w-full h-full rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : isAvailable ? (
           /* Grid dos 4 Cards de Commodities com dados reais da API */

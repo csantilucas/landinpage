@@ -1,20 +1,28 @@
-import { betterAuth } from 'better-auth';
-import { mongodbAdapter } from 'better-auth/adapters/mongodb';
-import { Db } from 'mongodb';
+﻿import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { prisma } from '../config/prisma.js';
 import { ENV, getAllowedOrigins } from '../config/env.js';
 
 let authInstance: any = null;
 
-export function initAuth(db: Db) {
+export function initAuth(client = prisma) {
   if (authInstance) return authInstance;
 
+  const isDev = process.env.NODE_ENV === 'development';
+
   authInstance = betterAuth({
-    database: mongodbAdapter(db),
+    database: prismaAdapter(client, {
+      provider: 'sqlserver',
+    }),
     secret: ENV.BETTER_AUTH_SECRET,
     baseURL: ENV.BETTER_AUTH_URL,
     emailAndPassword: {
       enabled: true,
       autoSignIn: true,
+    },
+    // Desativa o rate limit interno redundante do Better Auth em desenvolvimento local
+    rateLimit: {
+      enabled: !isDev,
     },
     user: {
       additionalFields: {
@@ -26,6 +34,10 @@ export function initAuth(db: Db) {
       },
     },
     advanced: {
+      ipAddress: {
+        ipAddressHeaders: ['x-forwarded-for', 'x-real-ip'],
+        trustedProxies: ['127.0.0.1', '::1'],
+      },
       defaultCookieAttributes: {
         sameSite: 'none',
         secure: true,
@@ -33,19 +45,7 @@ export function initAuth(db: Db) {
       },
       useSecureCookies: true,
     },
-    trustedOrigins: (request) => {
-      const origin = request?.headers?.get('origin');
-      const referer = request?.headers?.get('referer');
-      const origins: string[] = [...getAllowedOrigins()];
-      if (origin && !origins.includes(origin)) origins.push(origin);
-      if (referer) {
-        try {
-          const refOrigin = new URL(referer).origin;
-          if (!origins.includes(refOrigin)) origins.push(refOrigin);
-        } catch {}
-      }
-      return origins;
-    },
+    trustedOrigins: () => getAllowedOrigins(),
   });
 
   return authInstance;
@@ -53,7 +53,7 @@ export function initAuth(db: Db) {
 
 export function getAuth() {
   if (!authInstance) {
-    throw new Error('Better Auth ainda não foi inicializado. Execute initAuth(db) primeiro.');
+    return initAuth();
   }
   return authInstance;
 }

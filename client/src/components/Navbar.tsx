@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
@@ -6,7 +6,7 @@ import { Phone, Menu, X, MessageSquare } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSiteContent, CompanyInfo } from '@/lib/api';
 import { FALLBACK_COMPANY_INFO } from '@/data/fallbackData';
-import logoImg from '@/app/logo.png';
+import logoImg from '@/app/favicon.ico';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

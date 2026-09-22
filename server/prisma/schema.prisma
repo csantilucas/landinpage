@@ -1,0 +1,168 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------------------------------------
+// Modelos de Autenticação (Better Auth)
+// ----------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?   @db.NVarChar(Max)
+  role          String?   @default("user")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  ipAddress String?
+  userAgent String?  @db.NVarChar(Max)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?   @db.NVarChar(Max)
+  refreshToken          String?   @db.NVarChar(Max)
+  idToken               String?   @db.NVarChar(Max)
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?   @db.NVarChar(Max)
+  password              String?   @db.NVarChar(Max)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, accountId])
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String    @db.NVarChar(Max)
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+// ----------------------------------------------------
+// Modelos de Domínio do Site TRR Krupinski
+// ----------------------------------------------------
+
+model Banner {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.NVarChar(Max)
+  imageUrl    String   @db.NVarChar(Max)
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  linkUrl     String?  @db.NVarChar(Max)
+  linkText    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("banners")
+}
+
+model FleetItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.NVarChar(Max)
+  imageUrl    String   @db.NVarChar(Max)
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  category    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("fleet_items")
+}
+
+model Notice {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.NVarChar(Max)
+  message     String?  @db.NVarChar(Max)
+  imageUrl    String?  @db.NVarChar(Max)
+  linkUrl     String?  @db.NVarChar(Max)
+  linkText    String?
+  active      Boolean  @default(true)
+  type        String?
+  priority    Int?     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("notices")
+}
+
+model OperationalBase {
+  id              String   @id
+  name            String
+  city            String
+  state           String
+  type            String
+  address         String   @db.NVarChar(Max)
+  phones          String   @db.NVarChar(Max) // JSON serializado: string[]
+  whatsappNumber  String
+  whatsappDisplay String
+  coverage        String?
+  highlights      String?  @db.NVarChar(Max) // JSON serializado: string[]
+  coordinates     String?  @db.NVarChar(Max) // JSON serializado: { lat: number, lng: number }
+  googleMapsUrl   String   @db.NVarChar(Max)
+  embedUrl        String   @db.NVarChar(Max)
+  wazeUrl         String?  @db.NVarChar(Max)
+  order           Int      @default(0)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("operational_bases")
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  data      String   @db.NVarChar(Max) // JSON serializado: Record<string, any>
+  updatedAt DateTime @updatedAt
+
+  @@map("site_contents")
+}
+
+model CommoditiesCache {
+  id           String   @id @default(cuid())
+  key          String   @unique
+  items        String   @db.NVarChar(Max) // JSON serializado: CommodityItem[]
+  usdToBrl     Float
+  updatedAt    DateTime @updatedAt
+  nextUpdateAt DateTime
+  source       String
+  rawRates     String?  @db.NVarChar(Max) // JSON serializado: Record<string, number>
+
+  @@map("commodities_cache")
+}

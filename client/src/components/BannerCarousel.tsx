@@ -1,15 +1,17 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActiveBanners, BannerItem, formatImageUrl } from '@/lib/api';
+import { FALLBACK_BANNERS } from '@/data/fallbackData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const DEFAULT_BANNER: BannerItem = {
   _id: 'default-1',
   title: 'TRR KRUPINSKI',
-  description: 'Entregando qualidade a mais de 30 anos',
-  imageUrl: '/images/Gemini_Generated_Image_ywuiheywuiheywui.jpg',
+  description: 'Entregando qualidade há mais de 30 anos',
+  imageUrl: '/images/banner1.jpg',
   order: 1,
   active: true,
   linkUrl: '#sobre',
@@ -22,18 +24,23 @@ interface BannerCarouselProps {
 }
 
 export default function BannerCarousel({ initialBanners, isEditable = false }: BannerCarouselProps) {
-  const { data: apiBanners } = useQuery({
+  const { data: apiBanners, isLoading } = useQuery({
     queryKey: ['activeBanners'],
     queryFn: fetchActiveBanners,
     staleTime: 1000 * 60 * 2,
     enabled: !initialBanners,
   });
 
-  const banners = (initialBanners || apiBanners?.length ? (initialBanners || apiBanners) : [DEFAULT_BANNER]) as BannerItem[];
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
-  const total = banners.length;
+  const banners = useMemo(() => {
+    if (initialBanners) return initialBanners;
+    if (apiBanners && apiBanners.length > 0) return apiBanners;
+    return FALLBACK_BANNERS;
+  }, [initialBanners, apiBanners]);
+
+  const total = banners.length || 1;
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % total);
@@ -45,13 +52,34 @@ export default function BannerCarousel({ initialBanners, isEditable = false }: B
 
   // Auto-play de 6 segundos
   useEffect(() => {
-    if (total <= 1 || isPaused || isEditable) return;
+    if (isLoading || total <= 1 || isPaused || isEditable) return;
     const timer = setInterval(() => {
       nextSlide();
     }, 6000);
 
     return () => clearInterval(timer);
-  }, [total, isPaused, nextSlide, isEditable]);
+  }, [isLoading, total, isPaused, nextSlide, isEditable]);
+
+  // Skeleton de carregamento enquanto a API está buscando dados (sem violar regras dos hooks)
+  if (isLoading && !initialBanners) {
+    return (
+      <section
+        className="relative w-full h-[85vh] min-h-[560px] max-h-[920px] overflow-hidden bg-gray-300/80 select-none"
+        aria-label="Carregando Banners Principais"
+      >
+        <Skeleton className="w-full h-full rounded-none bg-gray-300/80 animate-pulse" />
+        <div className="absolute inset-0 z-30 max-w-7xl mx-auto h-full flex flex-col justify-start items-start pt-28 sm:pt-36 md:pt-40 px-6 sm:px-12 lg:px-16">
+          <div className="max-w-3xl space-y-4 w-full">
+            <Skeleton className="h-12 sm:h-16 md:h-20 w-3/4 rounded-2xl bg-gray-300/60" />
+            <Skeleton className="h-7 sm:h-9 md:h-10 w-2/3 rounded-xl bg-gray-300/50" />
+            <div className="pt-2">
+              <Skeleton className="h-12 w-48 rounded-2xl bg-amber-500/40" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const currentBanner = banners[currentIndex] || DEFAULT_BANNER;
   const bannerImage = formatImageUrl(currentBanner.imageUrl, DEFAULT_BANNER.imageUrl);

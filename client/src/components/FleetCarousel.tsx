@@ -30,6 +30,7 @@ export default function FleetCarousel() {
   });
 
   const items: FleetItem[] = useMemo(() => {
+    if (isLoading) return [];
     if (fleetData && fleetData.length > 0) {
       const carouselItems = fleetData.filter(
         (d) => !d.category || d.category === 'carrossel'
@@ -43,9 +44,9 @@ export default function FleetCarousel() {
         }));
       }
     }
-    // Fallback estrito quando a query não retorna dados
+    // Fallback estrito quando a query finalizou sem dados
     return FALLBACK_FLEET_ITEMS;
-  }, [fleetData]);
+  }, [fleetData, isLoading]);
 
   const total = items.length || 1;
 
@@ -95,21 +96,57 @@ export default function FleetCarousel() {
 
   if (isLoading) {
     return (
-      <section id="frota" className="py-20 bg-slate-900 text-white overflow-hidden relative">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div className="space-y-3">
-              <Skeleton className="h-6 w-32 rounded-full bg-slate-800" />
-              <Skeleton className="h-10 w-80 rounded-xl bg-slate-800" />
-              <Skeleton className="h-5 w-96 rounded-lg bg-slate-800" />
+      <section id="frota" className="py-20 bg-slate-100/60 border-t border-slate-200 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header Skeleton */}
+          <div className="text-center max-w-3xl mx-auto mb-12 flex flex-col items-center">
+            <Skeleton className="h-6 w-64 rounded-md mb-2" />
+            <Skeleton className="h-9 sm:h-10 w-80 sm:w-96 rounded-xl mt-2" />
+            <Skeleton className="h-4 w-full max-w-xl rounded-md mt-4" />
+            <Skeleton className="h-4 w-4/5 max-w-lg rounded-md mt-2" />
+          </div>
+
+          {/* Carousel Showcase Skeleton */}
+          <div className="relative flex items-center justify-center gap-2 sm:gap-3 md:gap-4 lg:gap-5 select-none">
+            {/* Slot -2: Far Left Pill */}
+            <div className="hidden lg:block relative h-[320px] sm:h-[380px] lg:h-[440px] w-14 xl:w-20 rounded-full overflow-hidden shrink-0">
+              <Skeleton className="w-full h-full rounded-full" />
             </div>
-            <div className="flex gap-2">
-              <Skeleton className="h-10 w-10 rounded-xl bg-slate-800" />
-              <Skeleton className="h-10 w-10 rounded-xl bg-slate-800" />
+
+            {/* Slot -1: Near Left Pill */}
+            <div className="hidden md:block relative h-[320px] sm:h-[380px] lg:h-[440px] w-20 sm:w-24 lg:w-32 rounded-full overflow-hidden shrink-0">
+              <Skeleton className="w-full h-full rounded-full" />
+            </div>
+
+            {/* Slot 0: Center Hero Card */}
+            <div className="relative h-[320px] sm:h-[380px] lg:h-[440px] w-full max-w-[660px] lg:max-w-[720px] rounded-3xl sm:rounded-[2.5rem] overflow-hidden shadow-xl border border-slate-200/80 shrink-0">
+              <Skeleton className="w-full h-full" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 space-y-2">
+                <Skeleton className="h-7 sm:h-8 w-2/3 rounded-lg" />
+                <Skeleton className="h-4 w-4/5 rounded-md" />
+              </div>
+            </div>
+
+            {/* Slot +1: Near Right Pill */}
+            <div className="hidden md:block relative h-[320px] sm:h-[380px] lg:h-[440px] w-20 sm:w-24 lg:w-32 rounded-full overflow-hidden shrink-0">
+              <Skeleton className="w-full h-full rounded-full" />
+            </div>
+
+            {/* Slot +2: Far Right Pill */}
+            <div className="hidden lg:block relative h-[320px] sm:h-[380px] lg:h-[440px] w-14 xl:w-20 rounded-full overflow-hidden shrink-0">
+              <Skeleton className="w-full h-full rounded-full" />
             </div>
           </div>
-          <div className="relative aspect-[16/9] md:aspect-[21/9] max-w-4xl mx-auto">
-            <Skeleton className="w-full h-full rounded-2xl bg-slate-800" />
+
+          {/* Bottom Indicators Skeleton */}
+          <div className="mt-8 flex items-center justify-between max-w-3xl mx-auto px-4">
+            <div className="flex gap-2">
+              <Skeleton className="h-2 w-8 rounded-full" />
+              <Skeleton className="h-2 w-2 rounded-full" />
+              <Skeleton className="h-2 w-2 rounded-full" />
+              <Skeleton className="h-2 w-2 rounded-full" />
+            </div>
+            <Skeleton className="h-4 w-28 rounded-md" />
           </div>
         </div>
       </section>

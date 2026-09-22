@@ -1,54 +1,78 @@
-import { Collection, ObjectId } from 'mongodb';
-import { getDB } from '../config/db.js';
+import { prisma } from '../config/prisma.js';
 import { BannerItem } from '../models/banner.model.js';
 
-export class BannerRepository {
-  private get collection(): Collection<BannerItem> {
-    return getDB().collection<BannerItem>('banners');
-  }
+function mapToBannerItem(item: any): BannerItem {
+  return {
+    ...item,
+    id: item.id,
+    _id: item.id,
+  };
+}
 
+export class BannerRepository {
   async findAll(): Promise<BannerItem[]> {
-    return this.collection.find({}).sort({ order: 1, createdAt: -1 }).toArray();
+    const items = await prisma.banner.findMany({
+      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+    });
+    return items.map(mapToBannerItem);
   }
 
   async findActive(): Promise<BannerItem[]> {
-    return this.collection.find({ active: true }).sort({ order: 1, createdAt: -1 }).toArray();
+    const items = await prisma.banner.findMany({
+      where: { active: true },
+      orderBy: [{ order: 'asc' }, { createdAt: 'desc' }],
+    });
+    return items.map(mapToBannerItem);
   }
 
   async findById(id: string): Promise<BannerItem | null> {
-    return this.collection.findOne({ _id: new ObjectId(id) });
+    try {
+      const item = await prisma.banner.findUnique({
+        where: { id },
+      });
+      return item ? mapToBannerItem(item) : null;
+    } catch {
+      return null;
+    }
   }
 
-  async create(data: Omit<BannerItem, '_id' | 'createdAt' | 'updatedAt'>): Promise<BannerItem> {
-    const now = new Date();
-    const doc: BannerItem = {
-      ...data,
-      active: data.active ?? true,
-      order: data.order ?? 0,
-      createdAt: now,
-      updatedAt: now,
-    };
-    const result = await this.collection.insertOne(doc);
-    return { ...doc, _id: result.insertedId };
+  async create(data: Omit<BannerItem, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<BannerItem> {
+    const { id: _, _id: __, ...rest } = data as any;
+    const item = await prisma.banner.create({
+      data: {
+        title: rest.title,
+        description: rest.description,
+        imageUrl: rest.imageUrl,
+        order: rest.order ?? 0,
+        active: rest.active ?? true,
+        linkUrl: rest.linkUrl ?? null,
+        linkText: rest.linkText ?? null,
+      },
+    });
+    return mapToBannerItem(item);
   }
 
   async update(id: string, data: Partial<BannerItem>): Promise<BannerItem | null> {
-    const { _id, ...cleanData } = data;
-    const result = await this.collection.findOneAndUpdate(
-      { _id: new ObjectId(id) },
-      {
-        $set: {
-          ...cleanData,
-          updatedAt: new Date(),
-        },
-      },
-      { returnDocument: 'after' }
-    );
-    return result as BannerItem | null;
+    try {
+      const { id: _, _id: __, createdAt: ___, updatedAt: ____, ...cleanData } = data;
+      const item = await prisma.banner.update({
+        where: { id },
+        data: cleanData as any,
+      });
+      return mapToBannerItem(item);
+    } catch {
+      return null;
+    }
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.collection.deleteOne({ _id: new ObjectId(id) });
-    return result.deletedCount > 0;
+    try {
+      await prisma.banner.delete({
+        where: { id },
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

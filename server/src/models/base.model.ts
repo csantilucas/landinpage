@@ -1,7 +1,5 @@
-import { ObjectId } from 'mongodb';
-
 export interface OperationalBaseItem {
-  _id?: ObjectId;
+  _id?: string;
   id: string;
   name: string;
   city: string;

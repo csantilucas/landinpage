@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+﻿import { Request, Response } from 'express';
 import { BannerService } from '../services/banner.service.js';
 
 export class BannerController {
@@ -24,7 +24,8 @@ export class BannerController {
 
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const banner = await this.bannerService.getBannerById(req.params.id);
+	const id = String(req.params.id)
+      const banner = await this.bannerService.getBannerById(id);
       if (!banner) {
         res.status(404).json({ success: false, error: 'Banner não encontrado' });
         return;
@@ -46,7 +47,8 @@ export class BannerController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
-      const updated = await this.bannerService.updateBanner(req.params.id, req.body);
+const id =String(req.params.id)
+      const updated = await this.bannerService.updateBanner(id, req.body);
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -55,7 +57,8 @@ export class BannerController {
 
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
-      const deleted = await this.bannerService.deleteBanner(req.params.id);
+const id = String(req.params.id)
+      const deleted = await this.bannerService.deleteBanner(id);
       res.json({ success: true, deleted });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

@@ -15,7 +15,8 @@ export class ContentController {
 
   getByKey = async (req: Request, res: Response): Promise<void> => {
     try {
-      const data = await this.contentService.getContentByKey(req.params.key);
+      const key = String(req.params.key);
+      const data = await this.contentService.getContentByKey(key);
       if (!data) {
         res.status(404).json({ success: false, error: 'Conteúdo não encontrado' });
         return;
@@ -29,8 +30,8 @@ export class ContentController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
-      const updated = await this.contentService.updateContent(req.params.key, req.body);
-      console.log(updated)
+      const key = String(req.params.key);
+      const updated = await this.contentService.updateContent(key, req.body);
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
