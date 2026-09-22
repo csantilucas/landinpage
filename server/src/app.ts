@@ -1,4 +1,4 @@
-import express from 'express';
+﻿import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { getAllowedOrigins } from './config/env.js';
@@ -11,6 +11,9 @@ import { createMainRouter } from './routes/index.js';
 export function createApp(): express.Express {
   const app = express();
 
+  // Habilita a leitura segura dos headers X-Forwarded-* enviados pelo Nginx
+  app.set('trust proxy', 1);
+
   // Headers de Segurança HTTP (Helmet)
   app.use(
     helmet({
@@ -18,11 +21,12 @@ export function createApp(): express.Express {
     })
   );
 
-  // CORS configurado para os IPs e origens definidos na variável de ambiente
+  // CORS configurado com validação estrita de origens permitidas
   const allowedOrigins = getAllowedOrigins();
 
   const corsMiddleware = cors({
     origin: (origin, callback) => {
+      // Permite requisições sem origin (como curl, mobile apps ou ferramentas internas)
       if (!origin) return callback(null, true);
 
       const matches = allowedOrigins.some((allowed) => {
@@ -34,34 +38,34 @@ export function createApp(): express.Express {
       });
 
       if (matches) {
-        return callback(null, origin);
+        return callback(null, true);
       }
 
-      callback(null, origin);
+      // Bloqueia com erro caso a origem seja desconhecida
+      callback(new Error(`Origem não permitida pelo CORS: ${origin}`));
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
   });
 
+  // Aplica o middleware de CORS
   app.use(corsMiddleware);
-  app.options('*', corsMiddleware);
 
-  // Rate limiter estrito nas rotas de login do Better Auth (5 tentativas por 15 min)
-  app.post(['/api/auth/sign-in', '/api/auth/sign-in/*'], authLimiter);
+  // Rate limiter estrito nas rotas de login do Better Auth
+  app.use('/api/auth/sign-in', authLimiter);
 
   // Handler do Better Auth montado ANTES de express.json()
-  // Isso é fundamental para evitar a condição de corrida no stream da requisição (body stream)
-  app.all(['/api/auth', '/api/auth/*'], toNodeHandler(getAuth()));
+  app.all(/^\/api\/auth(\/.*)?$/, toNodeHandler(getAuth()));
 
-  // Limite máximo de payload para evitar estouro de memória e DoS
+  // Limite máximo de payload para evitar DoS
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
-  // Auditoria e prevenção contra injeção de scripts (XSS e Prototype Pollution)
+  // Prevenção contra injeção de scripts (XSS e Prototype Pollution)
   app.use(preventScriptInjection);
 
-  // Rate limiter global para proteção contra DoS nas rotas da API (ignorado em ambiente de teste para velocidade)
+  // Rate limiter global para proteção contra DoS nas rotas da API
   if (process.env.NODE_ENV !== 'test') {
     app.use('/api', apiLimiter);
   }
@@ -69,7 +73,7 @@ export function createApp(): express.Express {
   // Montagem das rotas da API
   app.use('/api', createMainRouter());
 
-  // Middleware de erro 404
+  // Middleware de fallback 404
   app.use((_req, res) => {
     res.status(404).json({ success: false, error: 'Rota não encontrada' });
   });

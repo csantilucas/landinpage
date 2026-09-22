@@ -24,7 +24,8 @@ export class FleetController {
 
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const item = await this.fleetService.getItemById(req.params.id);
+      const id = String(req.params.id);
+      const item = await this.fleetService.getItemById(id);
       res.json({ success: true, data: item });
     } catch (error: any) {
       res.status(404).json({ success: false, error: error.message });
@@ -42,7 +43,8 @@ export class FleetController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
-      const updated = await this.fleetService.updateItem(req.params.id, req.body);
+      const id = String(req.params.id);
+      const updated = await this.fleetService.updateItem(id, req.body);
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -51,7 +53,8 @@ export class FleetController {
 
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
-      await this.fleetService.deleteItem(req.params.id);
+      const id = String(req.params.id);
+      await this.fleetService.deleteItem(id);
       res.json({ success: true, message: 'Item da frota excluído com sucesso' });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

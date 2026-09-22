@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Image from 'next/image';
 import { useQuery } from '@tanstack/react-query';
 import { fetchSiteContent, CompanyInfo } from '@/lib/api';
 import { FALLBACK_COMPANY_INFO } from '@/data/fallbackData';
-import logoImg from '@/app/logo.png';
+import logoImg from '@/app/favicon.ico';
 
 export default function Footer() {
   const { data: siteContent } = useQuery({

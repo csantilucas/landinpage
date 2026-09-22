@@ -24,7 +24,8 @@ export class NoticeController {
 
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const notice = await this.noticeService.getNoticeById(req.params.id);
+      const id = String(req.params.id);
+      const notice = await this.noticeService.getNoticeById(id);
       res.json({ success: true, data: notice });
     } catch (error: any) {
       res.status(404).json({ success: false, error: error.message });
@@ -42,7 +43,8 @@ export class NoticeController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
-      const updated = await this.noticeService.updateNotice(req.params.id, req.body);
+      const id = String(req.params.id);
+      const updated = await this.noticeService.updateNotice(id, req.body);
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -51,7 +53,8 @@ export class NoticeController {
 
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
-      await this.noticeService.deleteNotice(req.params.id);
+      const id = String(req.params.id);
+      await this.noticeService.deleteNotice(id);
       res.json({ success: true, message: 'Aviso excluído com sucesso' });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -60,7 +63,8 @@ export class NoticeController {
 
   toggle = async (req: Request, res: Response): Promise<void> => {
     try {
-      const toggled = await this.noticeService.toggleActive(req.params.id);
+      const id = String(req.params.id);
+      const toggled = await this.noticeService.toggleActive(id);
       res.json({ success: true, data: toggled });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

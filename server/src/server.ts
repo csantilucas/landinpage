@@ -1,4 +1,4 @@
-import { app } from './app.js';
+﻿import { app } from './app.js';
 import { ENV } from './config/env.js';
 import { connectDB, closeDB } from './config/db.js';
 import { initAuth } from './auth/better-auth.js';
@@ -16,10 +16,10 @@ export async function getApp() {
       throw new Error('A variável de ambiente DATABASE_URL não foi definida.');
     }
 
-    console.log('[Server] Inicializando conexão com o SQL Server (Prisma ORM)...');
+    console.log('[Server] Conectando ao SQL Server (Prisma ORM)...');
     await connectDB();
 
-    console.log('[Server] Inicializando Better Auth com adaptador SQL Server (Prisma)...');
+    console.log('[Server] Inicializando Better Auth...');
     initAuth();
 
     isInitialized = true;
@@ -31,7 +31,7 @@ export async function getApp() {
 
 export { app };
 
-// Handler padrão para serverless (Vercel)
+// Handler para serverless
 export default async function handler(req: any, res: any) {
   try {
     const initializedApp = await getApp();
@@ -41,16 +41,11 @@ export default async function handler(req: any, res: any) {
     if (!res.headersSent) {
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Access-Control-Allow-Origin', req.headers?.origin || '*');
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
       return res.end(
         JSON.stringify({
           success: false,
           error: 'Falha na inicialização do backend',
-          message: error?.message || String(error),
-          hint: !ENV.DATABASE_URL
-            ? 'Adicione DATABASE_URL nas variáveis de ambiente com a string do SQL Server.'
-            : 'Verifique se o SQL Server está acessível e aceitando conexões na porta configurada.',
+          message: process.env.NODE_ENV === 'production' ? 'Erro interno' : (error?.message || String(error)),
         })
       );
     }
@@ -61,7 +56,7 @@ async function bootstrap() {
   try {
     await getApp();
 
-    // Inicia agendador horário de commodities apenas em servidor contínuo
+    // Inicia agendador de commodities
     commodityService.startScheduledSync();
 
     const server = app.listen(ENV.PORT, () => {
@@ -69,12 +64,11 @@ async function bootstrap() {
       console.log(`🚀 Servidor TRR Krupinski rodando na porta ${ENV.PORT}`);
       console.log(`📡 URL da API: http://localhost:${ENV.PORT}/api`);
       console.log(`🔒 Better Auth: http://localhost:${ENV.PORT}/api/auth`);
-      console.log(`🌐 Cliente permitido: ${ENV.CLIENT_URL}`);
       console.log(`====================================================`);
     });
 
     const handleShutdown = async () => {
-      console.log('\n[Server] Encerrando servidor de forma segura...');
+      console.log('\n[Server] Encerrando servidor com segurança...');
       commodityService.stopScheduledSync();
       server.close(async () => {
         await closeDB();
@@ -90,7 +84,6 @@ async function bootstrap() {
   }
 }
 
-// Só inicia o servidor com listen se NÃO estiver rodando como serverless ou teste
 if (!process.env.VERCEL && process.env.NODE_ENV !== 'test') {
   bootstrap();
 }

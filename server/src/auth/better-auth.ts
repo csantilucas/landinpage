@@ -1,4 +1,4 @@
-import { betterAuth } from 'better-auth';
+﻿import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { prisma } from '../config/prisma.js';
 import { ENV, getAllowedOrigins } from '../config/env.js';
@@ -7,6 +7,8 @@ let authInstance: any = null;
 
 export function initAuth(client = prisma) {
   if (authInstance) return authInstance;
+
+  const isDev = process.env.NODE_ENV === 'development';
 
   authInstance = betterAuth({
     database: prismaAdapter(client, {
@@ -18,6 +20,10 @@ export function initAuth(client = prisma) {
       enabled: true,
       autoSignIn: true,
     },
+    // Desativa o rate limit interno redundante do Better Auth em desenvolvimento local
+    rateLimit: {
+      enabled: !isDev,
+    },
     user: {
       additionalFields: {
         role: {
@@ -28,6 +34,10 @@ export function initAuth(client = prisma) {
       },
     },
     advanced: {
+      ipAddress: {
+        ipAddressHeaders: ['x-forwarded-for', 'x-real-ip'],
+        trustedProxies: ['127.0.0.1', '::1'],
+      },
       defaultCookieAttributes: {
         sameSite: 'none',
         secure: true,
@@ -35,19 +45,7 @@ export function initAuth(client = prisma) {
       },
       useSecureCookies: true,
     },
-    trustedOrigins: (request) => {
-      const origin = request?.headers?.get('origin');
-      const referer = request?.headers?.get('referer');
-      const origins: string[] = [...getAllowedOrigins()];
-      if (origin && !origins.includes(origin)) origins.push(origin);
-      if (referer) {
-        try {
-          const refOrigin = new URL(referer).origin;
-          if (!origins.includes(refOrigin)) origins.push(refOrigin);
-        } catch {}
-      }
-      return origins;
-    },
+    trustedOrigins: () => getAllowedOrigins(),
   });
 
   return authInstance;
@@ -55,7 +53,6 @@ export function initAuth(client = prisma) {
 
 export function getAuth() {
   if (!authInstance) {
-    // Inicializa automaticamente se ainda não foi inicializado
     return initAuth();
   }
   return authInstance;

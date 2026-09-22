@@ -24,7 +24,8 @@ export class BaseController {
 
   getById = async (req: Request, res: Response): Promise<void> => {
     try {
-      const base = await this.baseService.getBaseById(req.params.id);
+      const id = String(req.params.id);
+      const base = await this.baseService.getBaseById(id);
       if (!base) {
         res.status(404).json({ success: false, error: 'Base operacional não encontrada' });
         return;
@@ -46,7 +47,8 @@ export class BaseController {
 
   update = async (req: Request, res: Response): Promise<void> => {
     try {
-      const updated = await this.baseService.updateBase(req.params.id, req.body);
+      const id = String(req.params.id);
+      const updated = await this.baseService.updateBase(id, req.body);
       res.json({ success: true, data: updated });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });
@@ -55,7 +57,8 @@ export class BaseController {
 
   delete = async (req: Request, res: Response): Promise<void> => {
     try {
-      const deleted = await this.baseService.deleteBase(req.params.id);
+      const id = String(req.params.id);
+      const deleted = await this.baseService.deleteBase(id);
       res.json({ success: true, deleted });
     } catch (error: any) {
       res.status(400).json({ success: false, error: error.message });

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -49,7 +49,7 @@ export default function AdminBasesPage() {
     queryFn: adminApi.getBases,
   });
 
-  const bases: OperationalBase[] = (response?.data && response.data.length > 0) ? response.data : FALLBACK_BASES;
+const bases: OperationalBase[] = Array.isArray(response?.data) ? response.data : [];
 
   // Mutação para Salvar
   const saveMutation = useMutation({
@@ -154,7 +154,11 @@ export default function AdminBasesPage() {
   };
 
   const handleDelete = (base: OperationalBase) => {
-    const idToDelete = (base as any)._id || base.id;
+    const idToDelete = base.id || (base as any)._id;
+    if (!idToDelete) {
+      setErrorMessage('Identificador da base inválido.');
+      return;
+    }
     if (confirm(`Tem certeza de que deseja excluir a base "${base.name}"?`)) {
       deleteMutation.mutate(idToDelete);
     }

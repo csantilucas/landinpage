@@ -1,4 +1,4 @@
-import { BaseRepository } from '../repositories/base.repository.js';
+﻿import { BaseRepository } from '../repositories/base.repository.js';
 import { OperationalBaseItem } from '../models/base.model.js';
 import { ContentRepository } from '../repositories/content.repository.js';
 
@@ -95,7 +95,11 @@ export class BaseService {
       throw new Error('Base operacional não encontrada');
     }
     const deleted = await this.baseRepo.delete(id);
-    await this.syncToSiteContent();
+    
+    // Atualiza a tabela de conteúdo com a lista restante (ou vazia)
+    const remaining = await this.baseRepo.findActive();
+    await this.contentRepo.upsert('company_bases', remaining);
+    
     return deleted;
   }
 }

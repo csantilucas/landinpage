@@ -1,4 +1,4 @@
-import { prisma } from '../config/prisma.js';
+﻿import { prisma } from '../config/prisma.js';
 import { OperationalBaseItem } from '../models/base.model.js';
 
 function safeParseJSON<T>(value: string | null | undefined, fallback: T): T {
