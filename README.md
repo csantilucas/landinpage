@@ -142,15 +142,6 @@ npm run dev
 
 Abra [http://localhost:3000](http://localhost:3000) no seu navegador para ver a Landing Page.
 
----
-
-## 🔐 Acesso Administrativo
-
-- **URL:** [http://localhost:3000/admin](http://localhost:3000/admin)
-- **E-mail Padrão:** `admin@trrkrupinski.com.br`
-- **Senha Padrão:** `admin123456`
-
----
 
 ## 🛡️ Segurança & Boas Práticas
 
